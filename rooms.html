@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rooms</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Rooms</h1>
+        <nav class="navbar">
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="hostels.html">Hostels</a>
+            <a href="applications.html">Applications</a>
+        </nav>
+    </header>
+    <main>
+        <ul id="rooms-list">
+            <!-- Dynamically populated -->
+        </ul>
+    </main>
+</body>
+<script>
+    async function loadRooms() {
+        const response = await fetch('/api/rooms'); // Replace with the appropriate API endpoint
+        const rooms = await response.json();
+
+        const roomsList = document.getElementById('rooms-list');
+        roomsList.innerHTML = '';
+        rooms.forEach(room => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <strong>${room.name}</strong> (Capacity: ${room.occupancy_limit})
+                <p>${room.description}</p>
+                <p>Available: ${room.available ? 'Yes' : 'No'}</p>
+            `;
+            roomsList.appendChild(li);
+        });
+    }
+
+    loadRooms();
+</script>
+</html>

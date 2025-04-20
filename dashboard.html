@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Student Dashboard</h1>
+        <nav class="navbar">
+            <a href="index.html">Home</a>
+            <a href="hostels.html">Hostels</a>
+            <a href="rooms.html">Rooms</a>
+            <a href="applications.html">Applications</a>
+        </nav>
+    </header>
+    <main>
+        <section id="profile">
+            <h2>Profile</h2>
+            <p>Name: <span id="student-name"></span></p>
+            <p>Email: <span id="student-email"></span></p>
+        </section>
+        <section id="applications">
+            <h2>Your Applications</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Status</th>
+                        <th>Applied At</th>
+                    </tr>
+                </thead>
+                <tbody id="applications-table">
+                    <!-- Dynamically populated -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+<script src="app.js"></script>
+</html>

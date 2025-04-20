@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applications</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Applications</h1>
+        <nav class="navbar">
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="hostels.html">Hostels</a>
+            <a href="rooms.html">Rooms</a>
+        </nav>
+    </header>
+    <main>
+        <form id="application-form">
+            <h2>Apply for a Room</h2>
+            <label for="room-select">Select Room:</label>
+            <select id="room-select">
+                <!-- Dynamically populated -->
+            </select>
+            <button type="button" onclick="submitApplication()">Apply</button>
+        </form>
+        <section id="application-status">
+            <h2>Your Applications</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Status</th>
+                        <th>Applied At</th>
+                    </tr>
+                </thead>
+                <tbody id="application-table">
+                    <!-- Dynamically populated -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+<script>
+    async function loadRoomsForApplication() {
+        const response = await fetch('/api/rooms'); // Replace with the appropriate API endpoint
+        const rooms = await response.json();
+
+        const roomSelect = document.getElementById('room-select');
+        roomSelect.innerHTML = '';
+        rooms.forEach(room => {
+            const option = document.createElement('option');
+            option.value = room.id;
+            option.textContent = `${room.name} (Capacity: ${room.occupancy_limit})`;
+            roomSelect.appendChild(option);
+        });
+    }
+
+    async function submitApplication() {
+        const roomId = document.getElementById('room-select').value;
+        const response = await fetch('/api/applications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ room_id: roomId }),
+        });
+        const result = await response.json();
+        alert(result.message || 'Application submitted successfully');
+        loadApplications();
+    }
+
+    async function loadApplications() {
+        const response = await fetch('/api/applications'); // Replace with the appropriate API endpoint
+        const applications = await response.json();
+
+        const applicationTable = document.getElementById('application-table');
+        applicationTable.innerHTML = '';
+        applications.forEach(app => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${app.room}</td>
+                <td>${app.status}</td>
+                <td>${app.applied_at}</td>
+            `;
+            applicationTable.appendChild(row);
+        });
+    }
+
+    // Initial load
+    loadRoomsForApplication();
+    loadApplications();
+</script>
+</html>
