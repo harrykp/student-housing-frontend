@@ -1,3 +1,5 @@
+const BACKEND_URL = 'https://student-housing-backend.onrender.com';
+
 // Fetch and populate student's dashboard data
 async function loadDashboard() {
     const response = await fetch('/api/dashboard');
