@@ -2,7 +2,7 @@ const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
 // Fetch and populate student's dashboard data
 async function loadDashboard() {
-    const response = await fetch('/api/dashboard');
+    const response = await fetch(`${BACKEND_URL}/api/dashboard`);
     const data = await response.json();
 
     // Populate profile
@@ -25,7 +25,7 @@ async function loadDashboard() {
 
 // Fetch and populate hostels list
 async function loadHostels() {
-    const response = await fetch('/api/hostels');
+    const response = await fetch(`${BACKEND_URL}/api/hostels`);
     const hostels = await response.json();
 
     const hostelsList = document.getElementById('hostels-list');
@@ -35,11 +35,4 @@ async function loadHostels() {
         li.textContent = `${hostel.name} - ${hostel.address}`;
         hostelsList.appendChild(li);
     });
-}
-
-// Call appropriate functions based on the page
-if (window.location.pathname.includes('dashboard.html')) {
-    loadDashboard();
-} else if (window.location.pathname.includes('hostels.html')) {
-    loadHostels();
 }
