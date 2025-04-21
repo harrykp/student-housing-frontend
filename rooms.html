@@ -8,38 +8,28 @@
 </head>
 <body>
     <header>
-        <h1>Rooms</h1>
-        <nav class="navbar">
-            <a href="index.html">Home</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="hostels.html">Hostels</a>
-            <a href="applications.html">Applications</a>
+        <h1>Available Rooms</h1>
+        <nav>
+            <ul class="navbar">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="hostels.html">Hostels</a></li>
+                <li><a href="rooms.html" class="active">Rooms</a></li>
+                <li><a href="applications.html">Applications</a></li>
+            </ul>
         </nav>
     </header>
+
     <main>
+        <h2>Rooms</h2>
         <ul id="rooms-list">
-            <!-- Dynamically populated -->
+            <!-- Rooms will be dynamically loaded here -->
         </ul>
     </main>
+
+    <footer>
+        <p>&copy; 2025 Student Housing System</p>
+    </footer>
+
+    <script src="app.js" defer></script>
 </body>
-<script>
-    async function loadRooms() {
-        const response = await fetch('/api/rooms'); // Replace with the appropriate API endpoint
-        const rooms = await response.json();
-
-        const roomsList = document.getElementById('rooms-list');
-        roomsList.innerHTML = '';
-        rooms.forEach(room => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <strong>${room.name}</strong> (Capacity: ${room.occupancy_limit})
-                <p>${room.description}</p>
-                <p>Available: ${room.available ? 'Yes' : 'No'}</p>
-            `;
-            roomsList.appendChild(li);
-        });
-    }
-
-    loadRooms();
-</script>
 </html>

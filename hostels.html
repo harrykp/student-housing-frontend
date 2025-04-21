@@ -8,19 +8,27 @@
 </head>
 <body>
     <header>
-        <h1>Hostels</h1>
-        <nav class="navbar">
-            <a href="index.html">Home</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="rooms.html">Rooms</a>
-            <a href="applications.html">Applications</a>
+        <h1>Available Hostels</h1>
+        <nav>
+            <ul class="navbar">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="hostels.html" class="active">Hostels</a></li>
+                <li><a href="rooms.html">Rooms</a></li>
+                <li><a href="applications.html">Applications</a></li>
+            </ul>
         </nav>
     </header>
+
     <main>
         <ul id="hostels-list">
-            <!-- Dynamically populated -->
+            <!-- Hostels will be dynamically loaded here -->
         </ul>
     </main>
+
+    <footer>
+        <p>&copy; 2025 Student Housing System</p>
+    </footer>
+
+    <script src="app.js" defer></script>
 </body>
-<script src="app.js"></script>
 </html>
