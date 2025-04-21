@@ -5,6 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Application Form</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        header, footer {
+            text-align: center;
+            padding: 1rem;
+            background: #2e86de;
+            color: white;
+        }
+        header h1, footer p {
+            margin: 0;
+        }
+        .navbar {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            background: #1e6ab9;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        .navbar a:hover {
+            background: #155a9c;
+        }
+        main {
+            padding: 2rem;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #f9f9f9;
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            color: white;
+            background: #28a745;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #218838;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -20,12 +90,23 @@
     <main>
         <form id="application-form">
             <label for="room-preference">Room Preference:</label>
-            <input type="text" id="room-preference" name="room-preference" required>
+            <select id="room-preference" name="room-preference" required>
+                <option value="">Select a room type</option>
+                <option value="single">Single Room</option>
+                <option value="double">Double Room</option>
+                <option value="suite">Suite</option>
+            </select>
 
             <label for="personal-details">Personal Details:</label>
-            <textarea id="personal-details" name="personal-details" required></textarea>
+            <textarea id="personal-details" name="personal-details" rows="4" placeholder="Enter your personal details..." required></textarea>
 
-            <button type="submit">Submit Application</button>
+            <label for="additional-notes">Additional Notes:</label>
+            <textarea id="additional-notes" name="additional-notes" rows="3" placeholder="Any additional information or requests..."></textarea>
+
+            <div style="text-align: center;">
+                <button type="submit">Submit Application</button>
+                <button type="reset" style="background: #dc3545;">Reset</button>
+            </div>
         </form>
     </main>
 
@@ -36,14 +117,28 @@
     <script>
         document.getElementById('application-form').addEventListener('submit', async (event) => {
             event.preventDefault();
+
             const roomPreference = document.getElementById('room-preference').value;
             const personalDetails = document.getElementById('personal-details').value;
+            const additionalNotes = document.getElementById('additional-notes').value;
+
+            if (!roomPreference || !personalDetails) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+
+            const confirmation = confirm("Do you want to submit your application?");
+            if (!confirmation) return;
 
             try {
                 const response = await fetch('/api/applications', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ roomPreference, personalDetails }),
+                    body: JSON.stringify({
+                        roomPreference,
+                        personalDetails,
+                        additionalNotes,
+                    }),
                 });
 
                 if (response.ok) {
