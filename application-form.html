@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Form</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Room Application Form</h1>
+        <nav>
+            <ul class="navbar">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <form id="application-form">
+            <label for="room-preference">Room Preference:</label>
+            <input type="text" id="room-preference" name="room-preference" required>
+
+            <label for="personal-details">Personal Details:</label>
+            <textarea id="personal-details" name="personal-details" required></textarea>
+
+            <button type="submit">Submit Application</button>
+        </form>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Student Housing System</p>
+    </footer>
+
+    <script>
+        document.getElementById('application-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const roomPreference = document.getElementById('room-preference').value;
+            const personalDetails = document.getElementById('personal-details').value;
+
+            try {
+                const response = await fetch('/api/applications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ roomPreference, personalDetails }),
+                });
+
+                if (response.ok) {
+                    alert('Application submitted successfully!');
+                    window.location.href = 'dashboard.html';
+                } else {
+                    throw new Error('Application submission failed.');
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    </script>
+</body>
+</html>
