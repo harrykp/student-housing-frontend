@@ -3,53 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        header, footer {
+            text-align: center;
+            padding: 1rem;
+            background: #2e86de;
+            color: white;
+        }
+        header h1, footer p {
+            margin: 0;
+        }
+        .navbar {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            background: #1e6ab9;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        .navbar a:hover {
+            background: #155a9c;
+        }
+        main {
+            padding: 2rem;
+        }
+        .profile-section, .stats-section, .recent-activities {
+            margin-bottom: 2rem;
+        }
+        .profile-section h2, .stats-section h2, .recent-activities h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .stats {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+        }
+        .stat {
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 1rem;
+            width: 150px;
+        }
+        .stat h3 {
+            font-size: 2rem;
+            margin: 0;
+            color: #2e86de;
+        }
+        .stat p {
+            margin: 0;
+        }
+        .recent-activities ul {
+            list-style: none;
+            padding: 0;
+        }
+        .recent-activities li {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>Student Dashboard</h1>
+        <h1>Dashboard</h1>
         <nav>
             <ul class="navbar">
                 <li><a href="index.html">Home</a></li>
-                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                <li><a href="applications.html">Applications</a></li>
                 <li><a href="hostels.html">Hostels</a></li>
                 <li><a href="rooms.html">Rooms</a></li>
-                <li><a href="applications.html">Applications</a></li>
-                <li><a href="register.html">Register</a></li>
-                <li><a href="login.html">Login</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <section>
-            <h2>Profile</h2>
-            <p>Name: <span id="student-name"></span></p>
-            <p>Email: <span id="student-email"></span></p>
+        <!-- Profile Section -->
+        <section class="profile-section">
+            <h2>Welcome</h2>
+            <p>Name: <span id="student-name">Loading...</span></p>
+            <p>Email: <span id="student-email">Loading...</span></p>
         </section>
 
-        <section>
-            <h2>Applications</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Room</th>
-                        <th>Status</th>
-                        <th>Applied At</th>
-                    </tr>
-                </thead>
-                <tbody id="applications-table">
-                    <!-- Applications will be dynamically loaded here -->
-                </tbody>
-            </table>
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <h2>Your Stats</h2>
+            <div class="stats">
+                <div class="stat">
+                    <h3 id="total-applications">0</h3>
+                    <p>Total Applications</p>
+                </div>
+                <div class="stat">
+                    <h3 id="pending-applications">0</h3>
+                    <p>Pending</p>
+                </div>
+                <div class="stat">
+                    <h3 id="accepted-applications">0</h3>
+                    <p>Accepted</p>
+                </div>
+                <div class="stat">
+                    <h3 id="rejected-applications">0</h3>
+                    <p>Rejected</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Activities Section -->
+        <section class="recent-activities">
+            <h2>Recent Activities</h2>
+            <ul id="recent-activities-list">
+                <li>Loading...</li>
+            </ul>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2025 Student Housing System</p>
+        <p>© 2025 Student Housing System</p>
     </footer>
 
     <script src="app.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+        });
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/dashboard');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch dashboard data');
+                }
+
+                const data = await response.json();
+
+                // Populate profile
+                document.getElementById('student-name').textContent = data.name;
+                document.getElementById('student-email').textContent = data.email;
+
+                // Populate stats
+                document.getElementById('total-applications').textContent = data.stats.total;
+                document.getElementById('pending-applications').textContent = data.stats.pending;
+                document.getElementById('accepted-applications').textContent = data.stats.accepted;
+                document.getElementById('rejected-applications').textContent = data.stats.rejected;
+
+                // Populate recent activities
+                const activitiesList = document.getElementById('recent-activities-list');
+                activitiesList.innerHTML = '';
+                data.activities.forEach(activity => {
+                    const li = document.createElement('li');
+                    li.textContent = activity;
+                    activitiesList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                alert('Failed to load dashboard data. Please try again later.');
+            }
+        }
+    </script>
 </body>
 </html>
