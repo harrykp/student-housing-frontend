@@ -5,61 +5,130 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        header, footer {
+            text-align: center;
+            padding: 1rem;
+            background: #2e86de;
+            color: white;
+        }
+        header h1, footer p {
+            margin: 0;
+        }
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 120px);
+        }
+        form {
+            max-width: 400px;
+            width: 100%;
+            background: #f9f9f9;
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            color: white;
+            background: #28a745;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .forgot-password a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <header>
         <h1>Login</h1>
-        <nav>
-            <ul class="navbar">
-                <li><a href="index.html">Home</a></li>
-            </ul>
-        </nav>
     </header>
 
     <main>
         <form id="login-form">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
+            <label for="email">Email or Username:</label>
+            <input type="text" id="email" name="email" placeholder="Enter your email or username" required>
 
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-
-            <label for="role">Role:</label>
-            <select id="role" name="role" required>
-                <option value="student">Student</option>
-                <option value="admin">Admin</option>
-            </select>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
             <button type="submit">Login</button>
+
+            <div class="forgot-password">
+                <a href="forgot-password.html">Forgot Password?</a>
+            </div>
         </form>
     </main>
 
     <footer>
-        <p>&copy; 2025 Student Housing System</p>
+        <p>© 2025 Student Housing System</p>
     </footer>
 
+    <script src="app.js" defer></script>
     <script>
         document.getElementById('login-form').addEventListener('submit', async (event) => {
             event.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!email || !password) {
+                alert('Please fill in both fields.');
+                return;
+            }
 
             try {
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, role }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
                 });
 
-                if (response.ok) {
-                    alert('Login successful!');
-                    window.location.href = role === 'student' ? 'dashboard.html' : 'admin.html';
-                } else {
-                    throw new Error('Login failed.');
+                if (!response.ok) {
+                    throw new Error('Invalid email or password.');
                 }
+
+                const data = await response.json();
+                alert('Login successful!');
+                window.location.href = 'dashboard.html';
             } catch (error) {
-                alert(error.message);
+                console.error('Error during login:', error.message);
+                alert('Login failed. Please check your credentials and try again.');
             }
         });
     </script>
