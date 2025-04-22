@@ -5,6 +5,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hostels</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        header, footer {
+            text-align: center;
+            padding: 1rem;
+            background: #2e86de;
+            color: white;
+        }
+        header h1, footer p {
+            margin: 0;
+        }
+        .navbar {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            background: #1e6ab9;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        .navbar a:hover {
+            background: #155a9c;
+        }
+        main {
+            padding: 2rem;
+        }
+        #filters {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        #filters input, #filters select {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #hostels-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .hostel-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1rem;
+            background: #f9f9f9;
+            width: calc(33.333% - 1rem);
+            box-sizing: border-box;
+        }
+        .hostel-card h3 {
+            margin: 0 0 0.5rem;
+        }
+        .hostel-card p {
+            margin: 0.5rem 0;
+        }
+        .hostel-card button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            color: white;
+            background: #28a745;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .hostel-card button:hover {
+            background: #218838;
+        }
+        @media (max-width: 768px) {
+            .hostel-card {
+                width: calc(50% - 1rem);
+            }
+        }
+        @media (max-width: 480px) {
+            .hostel-card {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -13,25 +108,100 @@
             <ul class="navbar">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="hostels.html" class="active">Hostels</a></li>
-                <li><a href="rooms.html">Rooms</a></li>
                 <li><a href="applications.html">Applications</a></li>
-                <li><a href="register.html">Register</a></li>
-                <li><a href="login.html">Login</a></li>
+                <li><a href="rooms.html">Rooms</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
+        <!-- Filters Section -->
+        <section id="filters">
+            <input type="text" id="search-hostels" placeholder="Search by name or location">
+            <select id="amenities-filter">
+                <option value="">Amenities</option>
+                <option value="Wi-Fi">Wi-Fi</option>
+                <option value="Laundry">Laundry</option>
+                <option value="Parking">Parking</option>
+            </select>
+            <input type="number" id="price-min" placeholder="Min Price">
+            <input type="number" id="price-max" placeholder="Max Price">
+            <button id="apply-filters">Apply Filters</button>
+        </section>
+
+        <!-- Hostels List -->
         <ul id="hostels-list">
             <!-- Hostels will be dynamically loaded here -->
         </ul>
     </main>
 
     <footer>
-        <p>&copy; 2025 Student Housing System</p>
+        <p>© 2025 Student Housing System</p>
     </footer>
 
     <script src="app.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHostels();
+
+            document.getElementById('apply-filters').addEventListener('click', () => {
+                const searchQuery = document.getElementById('search-hostels').value.toLowerCase();
+                const amenities = document.getElementById('amenities-filter').value;
+                const priceMin = parseFloat(document.getElementById('price-min').value) || 0;
+                const priceMax = parseFloat(document.getElementById('price-max').value) || Infinity;
+
+                loadHostels({ searchQuery, amenities, priceMin, priceMax });
+            });
+        });
+
+        async function loadHostels(filters = {}) {
+            const hostelsList = document.getElementById('hostels-list');
+            hostelsList.innerHTML = '<li>Loading...</li>';
+
+            try {
+                const response = await fetch('/api/hostels');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch hostels');
+                }
+
+                const hostels = await response.json();
+                hostelsList.innerHTML = '';
+
+                const filteredHostels = hostels.filter(hostel => {
+                    const matchesSearch = !filters.searchQuery || hostel.name.toLowerCase().includes(filters.searchQuery) || hostel.location.toLowerCase().includes(filters.searchQuery);
+                    const matchesAmenities = !filters.amenities || hostel.amenities.includes(filters.amenities);
+                    const matchesPrice = hostel.price >= filters.priceMin && hostel.price <= filters.priceMax;
+
+                    return matchesSearch && matchesAmenities && matchesPrice;
+                });
+
+                if (filteredHostels.length === 0) {
+                    hostelsList.innerHTML = '<li>No hostels found</li>';
+                    return;
+                }
+
+                filteredHostels.forEach(hostel => {
+                    const li = document.createElement('li');
+                    li.className = 'hostel-card';
+                    li.innerHTML = `
+                        <h3>${hostel.name}</h3>
+                        <p>Location: ${hostel.location}</p>
+                        <p>Amenities: ${hostel.amenities.join(', ')}</p>
+                        <p>Price: $${hostel.price}</p>
+                        <button onclick="viewHostelDetails(${hostel.id})">View More</button>
+                    `;
+                    hostelsList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error loading hostels:', error);
+                hostelsList.innerHTML = '<li>Error loading hostels</li>';
+            }
+        }
+
+        function viewHostelDetails(hostelId) {
+            alert(`Redirecting to details for Hostel ID: ${hostelId}`);
+            // Implement navigation to detailed hostel page or application form
+        }
+    </script>
 </body>
 </html>
