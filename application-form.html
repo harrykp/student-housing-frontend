@@ -74,6 +74,12 @@
         button:hover {
             background: #218838;
         }
+        button.reset {
+            background: #dc3545;
+        }
+        button.reset:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -105,15 +111,16 @@
 
             <div style="text-align: center;">
                 <button type="submit">Submit Application</button>
-                <button type="reset" style="background: #dc3545;">Reset</button>
+                <button type="reset" class="reset">Reset</button>
             </div>
         </form>
     </main>
 
     <footer>
-        <p>&copy; 2025 Student Housing System</p>
+        <p>© 2025 Student Housing System</p>
     </footer>
 
+    <script src="app.js" defer></script>
     <script>
         document.getElementById('application-form').addEventListener('submit', async (event) => {
             event.preventDefault();
