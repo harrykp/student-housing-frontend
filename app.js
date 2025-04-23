@@ -101,3 +101,32 @@ window.addEventListener('DOMContentLoaded', () => {
     loadHostels(); // Load hostels data
     loadDashboard(); // Load dashboard data
 });
+
+// Search function
+document.getElementById('search-button').addEventListener('click', async () => {
+    const query = document.getElementById('search-input').value.trim();
+    if (!query) {
+        alert('Please enter a search term.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/search?query=${encodeURIComponent(query)}`);
+        if (!response.ok) {
+            throw new Error(`Search failed: ${response.statusText}`);
+        }
+
+        const results = await response.json();
+        const resultsList = document.getElementById('hostels-list');
+        resultsList.innerHTML = ''; // Clear previous results
+
+        results.forEach(result => {
+            const li = document.createElement('li');
+            li.textContent = `${result.name} - ${result.description}`;
+            resultsList.appendChild(li);
+        });
+    } catch (error) {
+        console.error('Error during search:', error.message);
+        alert('Search failed. Please try again later.');
+    }
+});
