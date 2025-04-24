@@ -130,4 +130,50 @@ document.getElementById('search-button').addEventListener('click', async () => {
         alert('Search failed. Please try again later.');
     }
 });
+// Login function in app.js
+document.getElementById('login-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
 
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        if (!response.ok) throw new Error('Invalid credentials.');
+
+        alert('Login successful!');
+        window.location.href = 'dashboard.html';
+    } catch (error) {
+        console.error('Login error:', error.message);
+        alert('Failed to login. Please check your credentials.');
+    }
+});
+
+// Register function in app.js
+document.getElementById('register-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, phone, password })
+        });
+
+        if (!response.ok) throw new Error('Registration failed.');
+
+        alert('Registration successful!');
+        window.location.href = 'login.html';
+    } catch (error) {
+        console.error('Registration error:', error.message);
+        alert('Failed to register. Please try again.');
+    }
+});
