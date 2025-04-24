@@ -99,6 +99,39 @@
     </footer>
 
     <script src="app.js" defer></script>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
 
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!email || !password) {
+                alert('Please fill in both fields.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Invalid email or password.');
+                }
+
+                const data = await response.json();
+                alert('Login successful!');
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                console.error('Error during login:', error.message);
+                alert('Login failed. Please check your credentials and try again.');
+            }
+        });
+    </script>
 </body>
 </html>
