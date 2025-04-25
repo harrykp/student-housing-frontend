@@ -114,33 +114,33 @@ async function submitApplication(userId, roomId) {
 
 async function login(event) {
   event.preventDefault();
-  const email = document.getElementById('email')?.value.trim();
-  const password = document.getElementById('password')?.value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
   if (!email || !password) {
-    alert('Email and password are required.');
+    alert('Please fill in both fields.');
     return;
   }
   try {
+    // include role so authController.login will accept it
     const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password, role: 'student' })
     });
     if (!res.ok) throw new Error('Invalid credentials');
-    const { token } = await res.json();
-    localStorage.setItem('token', token);
+    alert('Login successful!');
     window.location.href = 'dashboard.html';
   } catch (err) {
-    console.error('Login error:', err.message);
-    alert('Login failed.');
+    console.error(err);
+    alert('Login failed. Please check your credentials and try again.');
   }
 }
 
 async function register(event) {
   event.preventDefault();
-  const username = document.getElementById('name')?.value.trim();
-  const email = document.getElementById('email')?.value.trim();
-  const password = document.getElementById('password')?.value.trim();
+  const username = document.getElementById('name').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
   if (!username || !email || !password) {
     alert('All fields are required.');
     return;
@@ -152,11 +152,11 @@ async function register(event) {
       body: JSON.stringify({ username, email, password })
     });
     if (!res.ok) throw new Error('Registration failed');
-    alert('Registration successful');
+    alert('Registration successful!');
     window.location.href = 'login.html';
   } catch (err) {
-    console.error('Registration error:', err.message);
-    alert('Registration failed.');
+    console.error(err);
+    alert('Registration failed. Please try again.');
   }
 }
 
@@ -179,27 +179,3 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
----
-
-## 9. HTML Element ID Requirements
-
-For **app.js** to work correctly, your HTML must include elements with the following `id` attributes:
-
-- **Hostels List**: `<ul id="hostels-list"></ul>`
-- **Profile Display**:
-  - `<span id="student-name"></span>` (or `<div>`, etc.)
-  - `<span id="student-email"></span>`
-- **Statistics Display**:
-  - `<span id="total-applications"></span>`
-  - `<span id="pending-applications"></span>`
-  - `<span id="accepted-applications"></span>`
-  - `<span id="rejected-applications"></span>`
-- **Recent Activities**: `<ul id="recent-activities-list"></ul>`
-- **Login Form**: `<form id="login-form">…</form>`
-  - Inside it: `<input id="email" …>` and `<input id="password" …>`
-- **Register Form**: `<form id="register-form">…</form>`
-  - Inside it: `<input id="name" …>`, `<input id="email" …>`, `<input id="password" …>`
-- **Apply Button & Room ID**:
-  ```html
-  <input id="room-id" type="number" />
-  <button id="apply-button">Apply</button>
