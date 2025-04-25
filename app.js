@@ -1,5 +1,5 @@
 // app.js (entry point for your frontend)
-
+ 
 // Backend Base URL
 default const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
