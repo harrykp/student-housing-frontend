@@ -34,22 +34,25 @@ async function loadDashboard() {
     try {
         const response = await fetch(`${BACKEND_URL}/api/dashboard`);
         if (!response.ok) {
-            throw new Error('Failed to fetch dashboard data');
+            throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
         }
 
         const data = await response.json();
 
-        // Populate dashboard sections
-        populateProfile(data);
-        populateStats(data.stats);
-        populateHostels(data.hostels);
-        populateRecentActivities(data.activities);
+        if (!data) {
+            throw new Error('Dashboard data is empty.');
+        }
+
+        // Safely populate dashboard sections
+        populateProfile(data.profile || {});
+        populateStats(data.stats || {});
+        populateHostels(data.hostels || []);
+        populateRecentActivities(data.activities || []);
     } catch (error) {
-        console.error('Error loading dashboard:', error);
+        console.error('Error loading dashboard:', error.message);
         alert('Failed to load dashboard data. Please try again later.');
     }
 }
-
 /**
  * Populate the profile section with user data.
  * @param {Object} data - The dashboard data.
