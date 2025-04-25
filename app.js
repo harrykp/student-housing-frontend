@@ -28,7 +28,7 @@ async function loadHostels() {
 }
 
 /**
- * Enhanced loadDashboard function for fetching and displaying dashboard data.
+ * Load and display dashboard data.
  */
 async function loadDashboard() {
     try {
@@ -39,40 +39,78 @@ async function loadDashboard() {
 
         const data = await response.json();
 
-        // Populate profile
-        document.getElementById('student-name').textContent = data.name || 'N/A';
-        document.getElementById('student-email').textContent = data.email || 'N/A';
-
-        // Populate stats
-        document.getElementById('total-applications').textContent = data.stats.total;
-        document.getElementById('pending-applications').textContent = data.stats.pending;
-        document.getElementById('accepted-applications').textContent = data.stats.accepted;
-        document.getElementById('rejected-applications').textContent = data.stats.rejected;
-
-        // Populate available hostels
-        const hostelsList = document.getElementById('hostels-list');
-        hostelsList.innerHTML = '';
-        data.hostels.forEach(hostel => {
-            const div = document.createElement('div');
-            div.className = 'hostel-card';
-            div.innerHTML = `
-                <h3>${hostel.name}</h3>
-                <p>${hostel.address}</p>
-            `;
-            hostelsList.appendChild(div);
-        });
-
-        // Populate recent activities
-        const activitiesList = document.getElementById('recent-activities-list');
-        activitiesList.innerHTML = '';
-        data.activities.forEach(activity => {
-            const li = document.createElement('li');
-            li.textContent = activity;
-            activitiesList.appendChild(li);
-        });
+        // Populate dashboard sections
+        populateProfile(data);
+        populateStats(data.stats);
+        populateHostels(data.hostels);
+        populateRecentActivities(data.activities);
     } catch (error) {
         console.error('Error loading dashboard:', error);
         alert('Failed to load dashboard data. Please try again later.');
+    }
+}
+
+/**
+ * Populate the profile section with user data.
+ * @param {Object} data - The dashboard data.
+ */
+function populateProfile(data) {
+    setTextContent('student-name', data.name || 'N/A');
+    setTextContent('student-email', data.email || 'N/A');
+}
+
+/**
+ * Populate the statistics section.
+ * @param {Object} stats - The stats data.
+ */
+function populateStats(stats) {
+    setTextContent('total-applications', stats.total);
+    setTextContent('pending-applications', stats.pending);
+    setTextContent('accepted-applications', stats.accepted);
+    setTextContent('rejected-applications', stats.rejected);
+}
+
+/**
+ * Populate the hostels section.
+ * @param {Array} hostels - List of hostels.
+ */
+function populateHostels(hostels) {
+    const hostelsList = document.getElementById('hostels-list');
+    hostelsList.innerHTML = '';
+    hostels.forEach(hostel => {
+        const div = document.createElement('div');
+        div.className = 'hostel-card';
+        div.innerHTML = `
+            <h3>${hostel.name}</h3>
+            <p>${hostel.address}</p>
+        `;
+        hostelsList.appendChild(div);
+    });
+}
+
+/**
+ * Populate the recent activities section.
+ * @param {Array} activities - List of recent activities.
+ */
+function populateRecentActivities(activities) {
+    const activitiesList = document.getElementById('recent-activities-list');
+    activitiesList.innerHTML = '';
+    activities.forEach(activity => {
+        const li = document.createElement('li');
+        li.textContent = activity;
+        activitiesList.appendChild(li);
+    });
+}
+
+/**
+ * Utility function to set text content of an element.
+ * @param {string} elementId - The ID of the element.
+ * @param {string} text - The text content to set.
+ */
+function setTextContent(elementId, text) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = text;
     }
 }
 
