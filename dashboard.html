@@ -41,10 +41,10 @@
         main {
             padding: 2rem;
         }
-        .profile-section, .stats-section, .recent-activities {
+        .profile-section, .stats-section, .recent-activities, .hostels-section {
             margin-bottom: 2rem;
         }
-        .profile-section h2, .stats-section h2, .recent-activities h2 {
+        .profile-section h2, .stats-section h2, .recent-activities h2, .hostels-section h2 {
             font-size: 1.5rem;
             margin-bottom: 1rem;
         }
@@ -68,16 +68,23 @@
         .stat p {
             margin: 0;
         }
-        .recent-activities ul {
+        .recent-activities ul, .hostels-list {
             list-style: none;
             padding: 0;
         }
-        .recent-activities li {
+        .recent-activities li, .hostel-card {
             margin-bottom: 0.5rem;
             padding: 0.5rem;
             background: #f9f9f9;
             border: 1px solid #ccc;
             border-radius: 5px;
+        }
+        .hostel-card h3 {
+            margin: 0;
+            color: #2e86de;
+        }
+        .hostel-card p {
+            margin: 0.5rem 0;
         }
     </style>
 </head>
@@ -125,6 +132,12 @@
             </div>
         </section>
 
+        <!-- Hostels Section -->
+        <section class="hostels-section">
+            <h2>Available Hostels</h2>
+            <div id="hostels-list">Loading...</div>
+        </section>
+
         <!-- Recent Activities Section -->
         <section class="recent-activities">
             <h2>Recent Activities</h2>
@@ -162,6 +175,20 @@
                 document.getElementById('pending-applications').textContent = data.stats.pending;
                 document.getElementById('accepted-applications').textContent = data.stats.accepted;
                 document.getElementById('rejected-applications').textContent = data.stats.rejected;
+
+                // Populate available hostels
+                const hostelsList = document.getElementById('hostels-list');
+                hostelsList.innerHTML = '';
+                data.hostels.forEach(hostel => {
+                    const div = document.createElement('div');
+                    div.className = 'hostel-card';
+                    div.innerHTML = `
+                        <h3>${hostel.name}</h3>
+                        <p>${hostel.address}</p>
+                        <p>Occupancy Limit: ${hostel.occupancy_limit}</p>
+                    `;
+                    hostelsList.appendChild(div);
+                });
 
                 // Populate recent activities
                 const activitiesList = document.getElementById('recent-activities-list');
