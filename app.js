@@ -1,241 +1,161 @@
+// app.js (entry point for your frontend)
 
 // Backend Base URL
-const BACKEND_URL = 'https://student-housing-backend.onrender.com'; // Replace with your backend's deployed URL
+const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
-/**
- * Fetch and display the list of hostels from the backend
- */
+// Utility to set text content safely
+function setTextContent(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
 async function loadHostels() {
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/hostels`); // Fetch hostels from backend
-        if (!response.ok) {
-            throw new Error(`Failed to fetch hostels: ${response.statusText}`);
-        }
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/hostels`);
+    if (!res.ok) throw new Error(`Hostels fetch error: ${res.status}`);
+    const hostels = await res.json();
 
-        const hostels = await response.json(); // Parse JSON response
-
-        // Display hostels in the page
-        const hostelsList = document.getElementById('hostels-list');
-        hostelsList.innerHTML = ''; // Clear existing content
-        hostels.forEach(hostel => {
-            const li = document.createElement('li');
-            li.textContent = `${hostel.name} - ${hostel.address}`;
-            hostelsList.appendChild(li);
-        });
-    } catch (error) {
-        console.error('Error loading hostels:', error.message);
-    }
+    const list = document.getElementById('hostels-list');
+    if (!list) return;
+    list.innerHTML = '';
+    hostels.forEach(({ name, address }) => {
+      const li = document.createElement('li');
+      li.textContent = `${name} - ${address}`;
+      list.appendChild(li);
+    });
+  } catch (err) {
+    console.error('Error loading hostels:', err.message);
+  }
 }
 
-/**
- * Load and display dashboard data.
- */
 async function loadDashboard() {
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/dashboard`);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
-        }
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/dashboard`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    if (!res.ok) throw new Error(`Dashboard fetch error: ${res.status}`);
+    const data = await res.json();
 
-        const data = await response.json();
-
-        if (!data) {
-            throw new Error('Dashboard data is empty.');
-        }
-
-        // Safely populate dashboard sections
-        populateProfile(data.profile || {});
-        populateStats(data.stats || {});
-        populateHostels(data.hostels || []);
-        populateRecentActivities(data.activities || []);
-    } catch (error) {
-        console.error('Error loading dashboard:', error.message);
-        alert('Failed to load dashboard data. Please try again later.');
+    if (data.error) {
+      console.error('API error:', data.error);
+      return;
     }
-}
-/**
- * Populate the profile section with user data.
- * @param {Object} data - The dashboard data.
- */
-function populateProfile(data) {
-    setTextContent('student-name', data.name || 'N/A');
-    setTextContent('student-email', data.email || 'N/A');
+
+    populateProfile(data.profile || {});
+    populateStats(data.stats || {});
+    populateHostels(data.hostels || []);
+    populateRecentActivities(data.activities || []);
+  } catch (err) {
+    console.error('Error loading dashboard:', err.message);
+    alert('Failed to load dashboard. Please try again.');
+  }
 }
 
-/**
- * Populate the statistics section.
- * @param {Object} stats - The stats data.
- */
-function populateStats(stats) {
-    setTextContent('total-applications', stats.total);
-    setTextContent('pending-applications', stats.pending);
-    setTextContent('accepted-applications', stats.accepted);
-    setTextContent('rejected-applications', stats.rejected);
+function populateProfile({ username, email }) {
+  setTextContent('student-name', username || 'N/A');
+  setTextContent('student-email', email || 'N/A');
 }
 
-/**
- * Populate the hostels section.
- * @param {Array} hostels - List of hostels.
- */
+function populateStats({ total, pending, accepted, rejected }) {
+  setTextContent('total-applications', total ?? 0);
+  setTextContent('pending-applications', pending ?? 0);
+  setTextContent('accepted-applications', accepted ?? 0);
+  setTextContent('rejected-applications', rejected ?? 0);
+}
+
 function populateHostels(hostels) {
-    const hostelsList = document.getElementById('hostels-list');
-    hostelsList.innerHTML = '';
-    hostels.forEach(hostel => {
-        const div = document.createElement('div');
-        div.className = 'hostel-card';
-        div.innerHTML = `
-            <h3>${hostel.name}</h3>
-            <p>${hostel.address}</p>
-        `;
-        hostelsList.appendChild(div);
-    });
+  const container = document.getElementById('hostels-list');
+  if (!container) return;
+  container.innerHTML = '';
+  hostels.forEach(({ name, address }) => {
+    const div = document.createElement('div');
+    div.className = 'hostel-card';
+    div.innerHTML = `<h3>${name}</h3><p>${address}</p>`;
+    container.appendChild(div);
+  });
 }
 
-/**
- * Populate the recent activities section.
- * @param {Array} activities - List of recent activities.
- */
 function populateRecentActivities(activities) {
-    const activitiesList = document.getElementById('recent-activities-list');
-    activitiesList.innerHTML = '';
-    activities.forEach(activity => {
-        const li = document.createElement('li');
-        li.textContent = activity;
-        activitiesList.appendChild(li);
-    });
+  const list = document.getElementById('recent-activities-list');
+  if (!list) return;
+  list.innerHTML = '';
+  activities.forEach(activity => {
+    const li = document.createElement('li');
+    li.textContent = activity;
+    list.appendChild(li);
+  });
 }
 
-/**
- * Utility function to set text content of an element.
- * @param {string} elementId - The ID of the element.
- * @param {string} text - The text content to set.
- */
-function setTextContent(elementId, text) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.textContent = text;
-    }
-}
-
-// Load dashboard data on page load
-window.addEventListener('DOMContentLoaded', () => {
-    loadDashboard();
-});
-
-/**
- * Submit a new application to the backend
- */
 async function submitApplication(userId, roomId) {
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/applications`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                room_id: roomId,
-                status: 'Pending'
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to submit application: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        console.log('Application submitted successfully:', result);
-        alert('Application submitted successfully!');
-    } catch (error) {
-        console.error('Error submitting application:', error.message);
-    }
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/applications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, room_id: roomId, status: 'Pending' })
+    });
+    if (!res.ok) throw new Error(`Submit error: ${res.status}`);
+    alert('Application submitted!');
+  } catch (err) {
+    console.error('Error submitting application:', err.message);
+    alert('Failed to submit application.');
+  }
 }
 
-// Example: Attach event listener for application submission
-document.getElementById('apply-button')?.addEventListener('click', () => {
-    const userId = 1; // Example student ID
-    const roomId = 2; // Example room ID
-    submitApplication(userId, roomId);
-});
+async function login(event) {
+  event.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  try {
+    const res = await fetch(`${BACKEND_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    if (!res.ok) throw new Error('Invalid credentials');
+    const { token } = await res.json();
+    localStorage.setItem('token', token);
+    window.location.href = 'dashboard.html';
+  } catch (err) {
+    console.error('Login error:', err.message);
+    alert('Login failed.');
+  }
+}
 
-// Load hostels and dashboard data when the page loads
+async function register(event) {
+  event.preventDefault();
+  const username = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  try {
+    const res = await fetch(`${BACKEND_URL}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password })
+    });
+    if (!res.ok) throw new Error('Registration failed');
+    alert('Registration successful');
+    window.location.href = 'login.html';
+  } catch (err) {
+    console.error('Registration error:', err.message);
+    alert('Registration failed.');
+  }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
-    loadHostels(); // Load hostels data
-    loadDashboard(); // Load dashboard data
-});
-
-// Search function
-document.getElementById('search-button').addEventListener('click', async () => {
+  loadHostels();
+  loadDashboard();
+  document.getElementById('apply-button')?.addEventListener('click', () => {
+    const userId = Number(localStorage.getItem('userId')); // ensure correct parsing
+    const roomId = Number(document.getElementById('room-id').value);
+    submitApplication(userId, roomId);
+  });
+  document.getElementById('search-button')?.addEventListener('click', async () => {
     const query = document.getElementById('search-input').value.trim();
-    if (!query) {
-        alert('Please enter a search term.');
-        return;
-    }
-
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/search?query=${encodeURIComponent(query)}`);
-        if (!response.ok) {
-            throw new Error(`Search failed: ${response.statusText}`);
-        }
-
-        const results = await response.json();
-        const resultsList = document.getElementById('hostels-list');
-        resultsList.innerHTML = ''; // Clear previous results
-
-        results.forEach(result => {
-            const li = document.createElement('li');
-            li.textContent = `${result.name} - ${result.description}`;
-            resultsList.appendChild(li);
-        });
-    } catch (error) {
-        console.error('Error during search:', error.message);
-        alert('Search failed. Please try again later.');
-    }
-});
-// Login function in app.js
-document.getElementById('login-form')?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/user`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-
-        if (!response.ok) throw new Error('Invalid credentials.');
-
-        alert('Login successful!');
-        window.location.href = 'dashboard.html';
-    } catch (error) {
-        console.error('Login error:', error.message);
-        alert('Failed to login. Please check your credentials.');
-    }
-});
-
-// Register function in app.js
-document.getElementById('register-form')?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const password = document.getElementById('password').value.trim();
-
-    try {
-        const response = await fetch(`${BACKEND_URL}/api/user`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, phone, password })
-        });
-
-        if (!response.ok) throw new Error('Registration failed.');
-
-        alert('Registration successful!');
-        window.location.href = 'login.html';
-    } catch (error) {
-        console.error('Registration error:', error.message);
-        alert('Failed to register. Please try again.');
-    }
+    if (!query) return;
+    // search logic...
+  });
+  document.getElementById('login-form')?.addEventListener('submit', login);
+  document.getElementById('register-form')?.addEventListener('submit', register);
 });
