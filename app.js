@@ -28,12 +28,35 @@ async function loadHostels() {
   }
 }
 
+// Fetch and display dashboard data
 async function loadDashboard() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.warn('No auth token, skipping dashboard fetch');
+    return;
+  }
   try {
     const res = await fetch(`${BACKEND_URL}/api/dashboard`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error(`Dashboard fetch error: ${res.status}`);
+    const data = await res.json();
+
+    if (data.error) {
+      console.error('API error:', data.error);
+      return;
+    }
+
+    populateProfile(data.profile || {});
+    populateStats(data.stats || {});
+    populateHostels(data.hostels || []);
+    populateRecentActivities(data.activities || []);
+  } catch (err) {
+    console.error('Error loading dashboard:', err.message);
+    alert('Failed to load dashboard. Please try again.');
+  }
+}
+
     });
     if (!res.ok) throw new Error(`Dashboard fetch error: ${res.status}`);
     const data = await res.json();
@@ -108,7 +131,7 @@ async function login(event) {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
   try {
-    const res = await fetch(`${BACKEND_URL}/auth/login`, {
+    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -129,14 +152,14 @@ async function register(event) {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
   try {
-    const res = await fetch(`${BACKEND_URL}/users`, {
+    const res = await fetch(`${BACKEND_URL}/api/users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password })
     });
     if (!res.ok) throw new Error('Registration failed');
     alert('Registration successful');
-    window.location.href = 'login.html';
+    window.location.href = 'login.html';   
   } catch (err) {
     console.error('Registration error:', err.message);
     alert('Registration failed.');
@@ -145,12 +168,23 @@ async function register(event) {
 
 window.addEventListener('DOMContentLoaded', () => {
   loadHostels();
-  loadDashboard();
+  // Only load dashboard if user has a token
+  if (localStorage.getItem('token')) {
+    loadDashboard();
+  }
   document.getElementById('apply-button')?.addEventListener('click', () => {
-    const userId = Number(localStorage.getItem('userId')); // ensure correct parsing
+    const userId = Number(localStorage.getItem('userId'));
     const roomId = Number(document.getElementById('room-id').value);
     submitApplication(userId, roomId);
   });
+  document.getElementById('search-button')?.addEventListener('click', async () => {
+    const query = document.getElementById('search-input').value.trim();
+    if (!query) return;
+    // search logic...
+  });
+  document.getElementById('login-form')?.addEventListener('submit', login);
+  document.getElementById('register-form')?.addEventListener('submit', register);
+});
   document.getElementById('search-button')?.addEventListener('click', async () => {
     const query = document.getElementById('search-input').value.trim();
     if (!query) return;
