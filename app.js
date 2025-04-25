@@ -28,37 +28,58 @@ async function loadHostels() {
 }
 
 /**
- * Fetch and display the student's dashboard data from the backend
+ * Enhanced loadDashboard function for fetching and displaying dashboard data.
  */
 async function loadDashboard() {
     try {
         const response = await fetch(`${BACKEND_URL}/api/dashboard`);
         if (!response.ok) {
-            throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
+            throw new Error('Failed to fetch dashboard data');
         }
 
         const data = await response.json();
 
-        // Populate profile information
+        // Populate profile
         document.getElementById('student-name').textContent = data.name;
         document.getElementById('student-email').textContent = data.email;
 
-        // Populate applications table
-        const applicationsTable = document.getElementById('applications-table');
-        applicationsTable.innerHTML = '';
-        data.applications.forEach(app => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${app.room}</td>
-                <td>${app.status}</td>
-                <td>${app.applied_at}</td>
+        // Populate stats
+        document.getElementById('total-applications').textContent = data.stats.total;
+        document.getElementById('pending-applications').textContent = data.stats.pending;
+        document.getElementById('accepted-applications').textContent = data.stats.accepted;
+        document.getElementById('rejected-applications').textContent = data.stats.rejected;
+
+        // Populate available hostels
+        const hostelsList = document.getElementById('hostels-list');
+        hostelsList.innerHTML = '';
+        data.hostels.forEach(hostel => {
+            const div = document.createElement('div');
+            div.className = 'hostel-card';
+            div.innerHTML = `
+                <h3>${hostel.name}</h3>
+                <p>${hostel.address}</p>
             `;
-            applicationsTable.appendChild(row);
+            hostelsList.appendChild(div);
+        });
+
+        // Populate recent activities
+        const activitiesList = document.getElementById('recent-activities-list');
+        activitiesList.innerHTML = '';
+        data.activities.forEach(activity => {
+            const li = document.createElement('li');
+            li.textContent = activity;
+            activitiesList.appendChild(li);
         });
     } catch (error) {
-        console.error('Error loading dashboard:', error.message);
+        console.error('Error loading dashboard:', error);
+        alert('Failed to load dashboard data. Please try again later.');
     }
 }
+
+// Load dashboard data on page load
+window.addEventListener('DOMContentLoaded', () => {
+    loadDashboard();
+});
 
 /**
  * Submit a new application to the backend
