@@ -63,7 +63,7 @@ async function loadDashboard() {
 /**
  * Submit a new application to the backend
  */
-async function submitApplication(studentId, roomId) {
+async function submitApplication(userId, roomId) {
     try {
         const response = await fetch(`${BACKEND_URL}/api/applications`, {
             method: 'POST',
@@ -71,7 +71,7 @@ async function submitApplication(studentId, roomId) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                student_id: studentId,
+                user_id: userId,
                 room_id: roomId,
                 status: 'Pending'
             })
@@ -91,9 +91,9 @@ async function submitApplication(studentId, roomId) {
 
 // Example: Attach event listener for application submission
 document.getElementById('apply-button')?.addEventListener('click', () => {
-    const studentId = 1; // Example student ID
+    const userId = 1; // Example student ID
     const roomId = 2; // Example room ID
-    submitApplication(studentId, roomId);
+    submitApplication(userId, roomId);
 });
 
 // Load hostels and dashboard data when the page loads
@@ -137,7 +137,7 @@ document.getElementById('login-form')?.addEventListener('submit', async (event) 
     const password = document.getElementById('password').value.trim();
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/auth`, {
+        const response = await fetch(`${BACKEND_URL}/api/user`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -162,7 +162,7 @@ document.getElementById('register-form')?.addEventListener('submit', async (even
     const password = document.getElementById('password').value.trim();
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/register`, {
+        const response = await fetch(`${BACKEND_URL}/api/user`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, phone, password })
