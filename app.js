@@ -39,15 +39,7 @@ async function loadDashboard() {
 
         const data = await response.json();
 
-        // Populate profile
-        document.getElementById('student-name').textContent = data.name || 'N/A';
-        document.getElementById('student-email').textContent = data.email || 'N/A';
 
-        // Populate stats
-        document.getElementById('total-applications').textContent = data.stats.total;
-        document.getElementById('pending-applications').textContent = data.stats.pending;
-        document.getElementById('accepted-applications').textContent = data.stats.accepted;
-        document.getElementById('rejected-applications').textContent = data.stats.rejected;
 
         // Populate available hostels
         const hostelsList = document.getElementById('hostels-list');
