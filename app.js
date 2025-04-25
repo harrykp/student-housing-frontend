@@ -1,7 +1,7 @@
 // app.js (entry point for your frontend)
 
 // Backend Base URL
-const BACKEND_URL = 'https://student-housing-backend.onrender.com';
+default const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
 // Utility to set text content safely
 function setTextContent(id, text) {
@@ -9,6 +9,9 @@ function setTextContent(id, text) {
   if (el) el.textContent = text;
 }
 
+/**
+ * Fetch and display the list of hostels
+ */
 async function loadHostels() {
   try {
     const res = await fetch(`${BACKEND_URL}/api/hostels`);
@@ -28,7 +31,9 @@ async function loadHostels() {
   }
 }
 
-// Fetch and display dashboard data
+/**
+ * Fetch and display dashboard data (requires valid JWT)
+ */
 async function loadDashboard() {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -53,26 +58,7 @@ async function loadDashboard() {
     populateRecentActivities(data.activities || []);
   } catch (err) {
     console.error('Error loading dashboard:', err.message);
-    alert('Failed to load dashboard. Please try again.');
-  }
-}
-
-    });
-    if (!res.ok) throw new Error(`Dashboard fetch error: ${res.status}`);
-    const data = await res.json();
-
-    if (data.error) {
-      console.error('API error:', data.error);
-      return;
-    }
-
-    populateProfile(data.profile || {});
-    populateStats(data.stats || {});
-    populateHostels(data.hostels || []);
-    populateRecentActivities(data.activities || []);
-  } catch (err) {
-    console.error('Error loading dashboard:', err.message);
-    alert('Failed to load dashboard. Please try again.');
+    alert('Failed to load dashboard.');
   }
 }
 
@@ -128,8 +114,12 @@ async function submitApplication(userId, roomId) {
 
 async function login(event) {
   event.preventDefault();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
+  const email = document.getElementById('email')?.value.trim();
+  const password = document.getElementById('password')?.value.trim();
+  if (!email || !password) {
+    alert('Email and password are required.');
+    return;
+  }
   try {
     const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: 'POST',
@@ -148,9 +138,13 @@ async function login(event) {
 
 async function register(event) {
   event.preventDefault();
-  const username = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
+  const username = document.getElementById('name')?.value.trim();
+  const email = document.getElementById('email')?.value.trim();
+  const password = document.getElementById('password')?.value.trim();
+  if (!username || !email || !password) {
+    alert('All fields are required.');
+    return;
+  }
   try {
     const res = await fetch(`${BACKEND_URL}/api/users`, {
       method: 'POST',
@@ -159,7 +153,7 @@ async function register(event) {
     });
     if (!res.ok) throw new Error('Registration failed');
     alert('Registration successful');
-    window.location.href = 'login.html';   
+    window.location.href = 'login.html';
   } catch (err) {
     console.error('Registration error:', err.message);
     alert('Registration failed.');
@@ -168,28 +162,19 @@ async function register(event) {
 
 window.addEventListener('DOMContentLoaded', () => {
   loadHostels();
-  // Only load dashboard if user has a token
   if (localStorage.getItem('token')) {
     loadDashboard();
   }
+  document.getElementById('login-form')?.addEventListener('submit', login);
+  document.getElementById('register-form')?.addEventListener('submit', register);
   document.getElementById('apply-button')?.addEventListener('click', () => {
     const userId = Number(localStorage.getItem('userId'));
-    const roomId = Number(document.getElementById('room-id').value);
+    const roomId = Number(document.getElementById('room-id')?.value);
     submitApplication(userId, roomId);
   });
   document.getElementById('search-button')?.addEventListener('click', async () => {
-    const query = document.getElementById('search-input').value.trim();
+    const query = document.getElementById('search-input')?.value.trim();
     if (!query) return;
-    // search logic...
+    // implement search logic here
   });
-  document.getElementById('login-form')?.addEventListener('submit', login);
-  document.getElementById('register-form')?.addEventListener('submit', register);
-});
-  document.getElementById('search-button')?.addEventListener('click', async () => {
-    const query = document.getElementById('search-input').value.trim();
-    if (!query) return;
-    // search logic...
-  });
-  document.getElementById('login-form')?.addEventListener('submit', login);
-  document.getElementById('register-form')?.addEventListener('submit', register);
 });
