@@ -40,8 +40,8 @@ async function loadDashboard() {
         const data = await response.json();
 
         // Populate profile
-        document.getElementById('student-name').textContent = data.name;
-        document.getElementById('student-email').textContent = data.email;
+        document.getElementById('student-name').textContent = data.name || 'N/A';
+        document.getElementById('student-email').textContent = data.email || 'N/A';
 
         // Populate stats
         document.getElementById('total-applications').textContent = data.stats.total;
