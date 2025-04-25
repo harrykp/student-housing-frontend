@@ -178,3 +178,28 @@ window.addEventListener('DOMContentLoaded', () => {
     // implement search logic here
   });
 });
+
+---
+
+## 9. HTML Element ID Requirements
+
+For **app.js** to work correctly, your HTML must include elements with the following `id` attributes:
+
+- **Hostels List**: `<ul id="hostels-list"></ul>`
+- **Profile Display**:
+  - `<span id="student-name"></span>` (or `<div>`, etc.)
+  - `<span id="student-email"></span>`
+- **Statistics Display**:
+  - `<span id="total-applications"></span>`
+  - `<span id="pending-applications"></span>`
+  - `<span id="accepted-applications"></span>`
+  - `<span id="rejected-applications"></span>`
+- **Recent Activities**: `<ul id="recent-activities-list"></ul>`
+- **Login Form**: `<form id="login-form">…</form>`
+  - Inside it: `<input id="email" …>` and `<input id="password" …>`
+- **Register Form**: `<form id="register-form">…</form>`
+  - Inside it: `<input id="name" …>`, `<input id="email" …>`, `<input id="password" …>`
+- **Apply Button & Room ID**:
+  ```html
+  <input id="room-id" type="number" />
+  <button id="apply-button">Apply</button>
