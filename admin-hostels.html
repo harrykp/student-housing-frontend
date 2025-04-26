@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin — Hostels</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
     <h1>Manage Hostels</h1>
     <nav class="navbar">
       <a href="index.html">Front End</a>
-      <a href="admin.html">Home</a>
+      <a href="admin.html">Admin Home</a>
       <a href="admin-hostels.html" class="active">Hostels</a>
       <a href="admin-rooms.html">Rooms</a>
       <a href="admin-students.html">Students</a>
@@ -39,19 +39,24 @@
     </table>
 
     <div id="hostel-form-modal" class="modal">
-      <form id="hostel-form">
-        <input type="hidden" id="hostel-id"/>
-        <label>Name<input type="text" id="hostel-name" required/></label>
-        <label>Description<textarea id="hostel-description" required></textarea></label>
-        <label>Occupancy<input type="number" id="hostel-occupancy" required/></label>
-        <label>Photo URL<input type="url" id="hostel-photo" required/></label>
-        <button type="submit">Save</button>
-        <button type="button" id="hostel-form-cancel">Cancel</button>
+      <form id="hostel-form" class="modal-form">
+        <input type="hidden" id="hostel-id" />
+        <label>Name: <input type="text" id="hostel-name" required /></label>
+        <label>Description: <textarea id="hostel-description" required></textarea></label>
+        <label>Occupancy: <input type="number" id="hostel-occupancy" required /></label>
+        <label>Photo URL: <input type="url" id="hostel-photo" required /></label>
+        <div class="modal-actions">
+          <button type="submit">Save</button>
+          <button type="button" id="hostel-form-cancel">Cancel</button>
+        </div>
       </form>
     </div>
   </main>
 
-  <footer><p>© 2025 Student Housing System</p></footer>
+  <footer>
+    <p>© 2025 Student Housing System</p>
+  </footer>
+
   <script src="admin.js" defer></script>
 </body>
 </html>
