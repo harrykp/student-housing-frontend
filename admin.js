@@ -8,10 +8,16 @@ function logout() {
   window.location.href = 'index.html';
 }
 
-// when any page loads, wire logout link
 document.addEventListener('DOMContentLoaded', () => {
+  // Wire logout link
   document.getElementById('logout-link')?.addEventListener('click', logout);
 });
+
+// UTILITY: close modal by ID
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.remove('active');
+}
 
 // HOSTELS
 async function loadHostelsAdmin() {
@@ -41,10 +47,10 @@ function openHostelForm(id = '') {
   const modal = document.getElementById('hostel-form-modal');
   modal.classList.add('active');
   document.getElementById('hostel-id').value = id;
-  ['name','description','occupancy','photo'].forEach(f => {
-    const el = document.getElementById(`hostel-${f}`);
-    if (el) el.value = '';
-  });
+  document.getElementById('hostel-name').value = '';
+  document.getElementById('hostel-description').value = '';
+  document.getElementById('hostel-occupancy').value = '';
+  document.getElementById('hostel-photo').value = '';
   if (id) {
     fetch(`${BACKEND_URL}/api/hostels/${id}`)
       .then(r => r.json())
@@ -59,7 +65,7 @@ function openHostelForm(id = '') {
 
 document.getElementById('hostel-form')?.addEventListener('submit', async e => {
   e.preventDefault();
-  const id = document.getElementById('hostel-id').value;
+  const id      = document.getElementById('hostel-id').value;
   const payload = {
     name:            document.getElementById('hostel-name').value,
     description:     document.getElementById('hostel-description').value,
@@ -73,8 +79,12 @@ document.getElementById('hostel-form')?.addEventListener('submit', async e => {
     headers:{ 'Content-Type':'application/json' },
     body: JSON.stringify(payload)
   });
-  document.getElementById('hostel-form-modal').classList.remove('active');
+  closeModal('hostel-form-modal');
   loadHostelsAdmin();
+});
+
+document.getElementById('hostel-form-cancel')?.addEventListener('click', () => {
+  closeModal('hostel-form-modal');
 });
 
 async function deleteHostel(id) {
@@ -112,10 +122,13 @@ async function loadRoomsAdmin() {
 function openRoomForm(id = '') {
   const modal = document.getElementById('room-form-modal');
   modal.classList.add('active');
-  ['name','description','price','occupancy','hostel-id','photo'].forEach(f => {
-    const el = document.getElementById(`room-${f.replace('-','-')}`);
-    if (el) el.value = '';
-  });
+  document.getElementById('room-id').value = id;
+  document.getElementById('room-name').value = '';
+  document.getElementById('room-description').value = '';
+  document.getElementById('room-price').value = '';
+  document.getElementById('room-occupancy').value = '';
+  document.getElementById('room-hostel-id').value = '';
+  document.getElementById('room-photo').value = '';
   if (id) {
     fetch(`${BACKEND_URL}/api/rooms/${id}`)
       .then(r => r.json())
@@ -132,7 +145,7 @@ function openRoomForm(id = '') {
 
 document.getElementById('room-form')?.addEventListener('submit', async e => {
   e.preventDefault();
-  const id = document.getElementById('room-id').value;
+  const id      = document.getElementById('room-id').value;
   const payload = {
     name:            document.getElementById('room-name').value,
     description:     document.getElementById('room-description').value,
@@ -148,8 +161,12 @@ document.getElementById('room-form')?.addEventListener('submit', async e => {
     headers:{ 'Content-Type':'application/json' },
     body: JSON.stringify(payload)
   });
-  document.getElementById('room-form-modal').classList.remove('active');
+  closeModal('room-form-modal');
   loadRoomsAdmin();
+});
+
+document.getElementById('room-form-cancel')?.addEventListener('click', () => {
+  closeModal('room-form-modal');
 });
 
 async function deleteRoom(id) {
@@ -260,7 +277,7 @@ document.getElementById('notification-form')?.addEventListener('submit', async e
   loadNotificationsAdmin();
 });
 
-// BOOTSTRAP
+// BOOTSTRAP PAGE
 window.addEventListener('DOMContentLoaded', () => {
   if (location.pathname.includes('admin-hostels.html')) {
     loadHostelsAdmin();
@@ -273,4 +290,4 @@ window.addEventListener('DOMContentLoaded', () => {
   if (location.pathname.includes('admin-students.html')) loadStudentsAdmin();
   if (location.pathname.includes('admin-applications.html')) loadApplicationsAdmin();
   if (location.pathname.includes('admin-notifications.html')) loadNotificationsAdmin();
-});
+} );
