@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Admin — Rooms</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
   <header>
@@ -26,14 +26,8 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Description</th>
-          <th>Price</th>
-          <th>Occupancy</th>
-          <th>Hostel</th>
-          <th>Photo</th>
-          <th>Actions</th>
+          <th>ID</th><th>Name</th><th>Description</th><th>Price</th>
+          <th>Occupancy</th><th>Hostel</th><th>Photo</th><th>Actions</th>
         </tr>
       </thead>
       <tbody id="rooms-table-body"></tbody>
@@ -41,13 +35,13 @@
 
     <div id="room-form-modal" class="modal">
       <form id="room-form" class="modal-form">
-        <input type="hidden" id="room-id" />
-        <label>Name: <input type="text" id="room-name" required /></label>
+        <input type="hidden" id="room-id"/>
+        <label>Name: <input type="text" id="room-name" required/></label>
         <label>Description: <textarea id="room-description" required></textarea></label>
-        <label>Price: <input type="number" id="room-price" required /></label>
-        <label>Occupancy: <input type="number" id="room-occupancy" required /></label>
-        <label>Hostel ID: <input type="number" id="room-hostel-id" required /></label>
-        <label>Photo URL: <input type="url" id="room-photo" required /></label>
+        <label>Price: <input type="number" id="room-price" required/></label>
+        <label>Occupancy: <input type="number" id="room-occupancy" required/></label>
+        <label>Hostel ID: <input type="number" id="room-hostel-id" required/></label>
+        <label>Photo URL: <input type="url" id="room-photo" required/></label>
         <div class="modal-actions">
           <button type="submit">Save</button>
           <button type="button" id="room-form-cancel">Cancel</button>
