@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Admin — Rooms | Student Housing</title>
+  <title>Admin — Students | Student Housing</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
@@ -12,8 +12,8 @@
     <nav class="navbar">
       <a href="admin.html">Home</a>
       <a href="admin-hostels.html">Hostels</a>
-      <a href="admin-rooms.html" class="active">Rooms</a>
-      <a href="admin-students.html">Students</a>
+      <a href="admin-rooms.html">Rooms</a>
+      <a href="admin-students.html" class="active">Students</a>
       <a href="admin-applications.html">Applications</a>
       <a href="admin-notifications.html">Notifications</a>
     </nav>
@@ -21,40 +21,19 @@
 
   <main>
     <section>
-      <button id="create-room-button">+ New Room</button>
-    </section>
-
-    <section>
       <table>
         <thead>
           <tr>
             <th>ID</th>
             <th>Name</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Occupancy</th>
-            <th>Hostel ID</th>
-            <th>Photo URL</th>
+            <th>Email</th>
+            <th>Phone</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody id="rooms-table-body"></tbody>
+        <tbody id="students-table-body"></tbody>
       </table>
     </section>
-
-    <div id="room-form-modal" class="modal" style="display:none;">
-      <form id="room-form">
-        <input type="hidden" id="room-id" />
-        <label>Name<input type="text" id="room-name" required /></label>
-        <label>Description<textarea id="room-description" required></textarea></label>
-        <label>Price<input type="number" id="room-price" step="0.01" required /></label>
-        <label>Occupancy<input type="number" id="room-occupancy" required /></label>
-        <label>Hostel ID<input type="number" id="room-hostel-id" required /></label>
-        <label>Photo URL<input type="url" id="room-photo" required /></label>
-        <button type="submit">Save</button>
-        <button type="button" id="room-form-cancel">Cancel</button>
-      </form>
-    </div>
   </main>
 
   <footer><p>© 2025 Student Housing System</p></footer>
