@@ -1,30 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Home | Student Housing</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Student Housing</title>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
   <header>
-    <h1>Student Housing System</h1>
+    <h1>Student Housing</h1>
     <nav class="navbar">
       <a href="index.html" class="active">Home</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="hostels.html">Hostels</a>
       <a href="rooms.html">Rooms</a>
+      <a href="hostels.html">Hostels</a>
       <a href="applications.html">My Applications</a>
-      <a href="register.html">Register</a>
       <a href="login.html">Login</a>
     </nav>
   </header>
 
   <main>
-    <section class="hero">
-      <h2>Welcome!</h2>
-      <p>Manage your housing applications, room assignments, and stay up to date with notifications.</p>
-      <a href="register.html" class="button">Get Started</a>
+    <!-- Search Form -->
+    <section id="search-section">
+      <form id="search-form" class="form">
+        <label>
+          Type
+          <select id="search-type">
+            <option value="all">All</option>
+            <option value="hostel">Hostels</option>
+            <option value="room">Rooms</option>
+          </select>
+        </label>
+        <label>
+          Location
+          <input type="text" id="search-location" placeholder="City or address"/>
+        </label>
+        <label>
+          Min Price
+          <input type="number" id="search-min-price" placeholder="0"/>
+        </label>
+        <label>
+          Max Price
+          <input type="number" id="search-max-price" placeholder="Any"/>
+        </label>
+        <label>
+          Amenities (comma-separated)
+          <input type="text" id="search-amenities" placeholder="WiFi,Pool,..."/>
+        </label>
+        <button type="submit" id="search-button">Search</button>
+        <button type="button" id="clear-search-button">Clear</button>
+      </form>
+    </section>
+
+    <!-- Hostels Section -->
+    <section id="hostels-section">
+      <h2>Available Hostels</h2>
+      <ul id="hostels-list">
+        <!-- populated by app.js → renderHostels() -->
+      </ul>
+    </section>
+
+    <!-- Rooms Section -->
+    <section id="rooms-section">
+      <h2>Available Rooms</h2>
+      <ul id="rooms-list">
+        <!-- populated by app.js → renderRooms() -->
+      </ul>
     </section>
   </main>
 
