@@ -5,17 +5,12 @@ const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 // -- Modal Helpers ---------------------------------------------------------
 function openModal(id) {
   const modal = document.getElementById(id);
-  if (modal) {
-    // Ensure modal is visible
-    modal.style.display = 'flex';
-  }
+  if (modal) modal.classList.add('active');
 }
 
 function closeModal(id) {
   const modal = document.getElementById(id);
-  if (modal) {
-    modal.style.display = 'none';
-  }
+  if (modal) modal.classList.remove('active');
 }
 
 // -- Authentication -------------------------------------------------------
@@ -32,15 +27,13 @@ async function loadHostelsAdmin() {
   ]);
   const hostels = await hRes.json();
   const rooms   = await rRes.json();
-
-  const tbody = document.getElementById('hostels-table-body');
+  const tbody   = document.getElementById('hostels-table-body');
   tbody.innerHTML = '';
 
   hostels.forEach(h => {
-    const linked = rooms
-      .filter(r => r.hostel_id === h.id)
-      .map(r => r.name)
-      .join(', ') || '—';
+    const linked = rooms.filter(r => r.hostel_id === h.id)
+                        .map(r => r.name)
+                        .join(', ') || '—';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${h.id}</td>
@@ -63,10 +56,7 @@ async function openHostelForm(id = '') {
 
   if (id) {
     const res = await fetch(`${BACKEND_URL}/api/hostels/${id}`);
-    if (!res.ok) {
-      console.error(`Hostel ${id} not found. Status: ${res.status}`);
-      return alert('That hostel no longer exists.');
-    }
+    if (!res.ok) return alert('Hostel not found');
     const h = await res.json();
     document.getElementById('hostel-id').value          = h.id;
     document.getElementById('hostel-name').value        = h.name;
@@ -79,7 +69,7 @@ async function openHostelForm(id = '') {
 
 async function saveHostel(e) {
   e.preventDefault();
-  const id = document.getElementById('hostel-id').value;
+  const id      = document.getElementById('hostel-id').value;
   const payload = {
     name:            document.getElementById('hostel-name').value.trim(),
     description:     document.getElementById('hostel-description').value.trim(),
@@ -88,7 +78,10 @@ async function saveHostel(e) {
   };
   await fetch(
     `${BACKEND_URL}/api/hostels${id ? `/${id}` : ''}`,
-    { method: id ? 'PUT' : 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(payload) }
+    { method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    }
   );
   closeModal('hostel-form-modal');
   loadHostelsAdmin();
@@ -108,13 +101,11 @@ async function loadRoomsAdmin() {
   ]);
   const rooms   = await rRes.json();
   const hostels = await hRes.json();
-
-  const tbody = document.getElementById('rooms-table-body');
+  const tbody   = document.getElementById('rooms-table-body');
   tbody.innerHTML = '';
 
   rooms.forEach(r => {
-    const hostel = hostels.find(h => h.id === r.hostel_id);
-    const name   = hostel ? hostel.name : '—';
+    const hostelName = (hostels.find(h => h.id === r.hostel_id) || {}).name || '—';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${r.id}</td>
@@ -122,7 +113,7 @@ async function loadRoomsAdmin() {
       <td>${r.description}</td>
       <td>${r.price}</td>
       <td>${r.occupancy_limit}</td>
-      <td>${name}</td>
+      <td>${hostelName}</td>
       <td><a href="${r.photo_url}" target="_blank">View</a></td>
       <td>
         <button class="edit-room" data-id="${r.id}">Edit</button>
@@ -138,10 +129,7 @@ async function openRoomForm(id = '') {
 
   if (id) {
     const res = await fetch(`${BACKEND_URL}/api/rooms/${id}`);
-    if (!res.ok) {
-      console.error(`Room ${id} not found. Status: ${res.status}`);
-      return alert('That room no longer exists.');
-    }
+    if (!res.ok) return alert('Room not found');
     const r = await res.json();
     document.getElementById('room-id').value           = r.id;
     document.getElementById('room-name').value         = r.name;
@@ -152,10 +140,11 @@ async function openRoomForm(id = '') {
     document.getElementById('room-photo').value        = r.photo_url;
   }
   openModal('room-form-modal');
+}
 
 async function saveRoom(e) {
   e.preventDefault();
-  const id = document.getElementById('room-id').value;
+  const id      = document.getElementById('room-id').value;
   const payload = {
     name:            document.getElementById('room-name').value.trim(),
     description:     document.getElementById('room-description').value.trim(),
@@ -166,7 +155,10 @@ async function saveRoom(e) {
   };
   await fetch(
     `${BACKEND_URL}/api/rooms${id ? `/${id}` : ''}`,
-    { method: id ? 'PUT' : 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(payload) }
+    { method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    }
   );
   closeModal('room-form-modal');
   loadRoomsAdmin();
