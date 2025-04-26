@@ -3,33 +3,28 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Admin Panel | Student Housing</title>
+  <title>Admin Home | Student Housing</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
   <header>
     <h1>Admin Dashboard</h1>
     <nav class="navbar">
+      <a href="index.html">Front End</a>
       <a href="admin.html" class="active">Home</a>
       <a href="admin-hostels.html">Hostels</a>
       <a href="admin-rooms.html">Rooms</a>
       <a href="admin-students.html">Students</a>
       <a href="admin-applications.html">Applications</a>
       <a href="admin-notifications.html">Notifications</a>
+      <a href="#" id="logout-link">Logout</a>
     </nav>
   </header>
-
   <main>
-    <section>
-      <h2>Welcome, Admin</h2>
-      <p>Use the links above to manage the system.</p>
-    </section>
+    <h2>Welcome, Admin</h2>
+    <p>Use the links above to manage hostels, rooms, users, applications, and notifications.</p>
   </main>
-
-  <footer>
-    <p>© 2025 Student Housing System</p>
-  </footer>
-
+  <footer><p>© 2025 Student Housing System</p></footer>
   <script src="admin.js" defer></script>
 </body>
 </html>
