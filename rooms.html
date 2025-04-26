@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rooms | Student Housing</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
@@ -13,21 +13,21 @@
       <a href="index.html">Home</a>
       <a href="dashboard.html">Dashboard</a>
       <a href="hostels.html">Hostels</a>
-      <a href="applications.html">My Applications</a>
       <a href="rooms.html" class="active">Rooms</a>
+      <a href="applications.html">My Applications</a>
     </nav>
   </header>
 
   <main>
-    <ul id="rooms-list">
-      <!-- app.js → loadRooms() will insert cards:
-        <div class="room-card">
-          <img src="…" alt="Room photo">
-          <h3>Room Type</h3>
+    <ul id="rooms-list" class="rooms-grid">
+      <!-- app.js → loadRoomsSection() will populate:
+        <li class="room-card">
+          <img src="..." alt="Room photo" />
+          <h3>Room Name</h3>
           <p>Price: $X / mo</p>
-          <p>Occupancy limit: Y</p>
-          <button data-room-id="…">Apply</button>
-        </div>
+          <p>Occupancy: Y</p>
+          <p>Hostel: Hostel Name</p>
+        </li>
       -->
     </ul>
   </main>
