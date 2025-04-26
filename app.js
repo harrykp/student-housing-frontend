@@ -1,239 +1,230 @@
-// app.js (frontend entry)
+// app.js (frontend entry point)
 
 const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
-// ——— Auth Handlers ———————————————————————————————————————————————————
-async function login(event) {
-  event.preventDefault();
-  const email    = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
-  if (!email || !password) {
-    return alert('Both fields are required.');
-  }
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
-      method:  'POST',
-      headers: { 'Content-Type':'application/json' },
-      body:    JSON.stringify({ email, password })
-    });
-    if (!res.ok) throw new Error((await res.json()).error || 'Login failed');
-    const { token } = await res.json();
-    localStorage.setItem('token', token);
-    window.location.href = 'dashboard.html';
-  } catch (err) {
-    console.error(err);
-    alert(`Login failed: ${err.message}`);
-  }
-}
-
-async function register(event) {
-  event.preventDefault();
-  const username = document.getElementById('name').value.trim();
-  const email    = document.getElementById('email').value.trim();
-  const phone    = document.getElementById('phone').value.trim();
-  const password = document.getElementById('password').value.trim();
-  if (!username || !email || !phone || !password) {
-    return alert('All fields are required.');
-  }
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/users`, {
-      method:  'POST',
-      headers: { 'Content-Type':'application/json' },
-      body:    JSON.stringify({ username, email, phone, password })
-    });
-    if (!res.ok) throw new Error((await res.json()).error || 'Registration failed');
-    alert('Registration successful!');
-    window.location.href = 'login.html';
-  } catch (err) {
-    console.error(err);
-    alert(`Registration failed: ${err.message}`);
-  }
-}
-
-// ——— Utility —————————————————————————————————————————————————————————
-async function fetchJSON(url, opts) {
-  const res = await fetch(url, opts);
-  if (!res.ok) throw new Error(`Fetch ${url} failed (${res.status})`);
-  return res.json();
-}
-
-// ——— Student Sections —————————————————————————————————————————————————
+// ─── HOSTELS ─────────────────────────────────────────────────────────────────
 async function loadHostelsSection() {
   try {
-    const hostels = await fetchJSON(`${BACKEND_URL}/api/hostels`);
-    const ul = document.getElementById('hostels-list');
-    ul.innerHTML = '';
+    const res = await fetch(`${BACKEND_URL}/api/hostels`);
+    if (!res.ok) throw new Error(`Hostels fetch error: ${res.status}`);
+    const hostels = await res.json();
+    const list = document.getElementById('hostels-list');
+    if (!list) return;
+    list.innerHTML = '';
     hostels.forEach(h => {
       const li = document.createElement('li');
-      li.innerHTML = `<h3>${h.name}</h3><p>${h.address || h.description}</p>`;
-      ul.appendChild(li);
+      li.textContent = `${h.name} – ${h.address || h.description}`;
+      list.appendChild(li);
     });
   } catch (err) {
-    console.error(err);
-    alert('Failed to load hostels.');
+    console.error('Error loading hostels:', err);
+    document.getElementById('hostels-list')?.insertAdjacentHTML('beforeend', '<li>Error loading hostels.</li>');
   }
 }
 
+// ─── ROOMS ──────────────────────────────────────────────────────────────────
 async function loadRoomsSection() {
   try {
-    const [rooms, hostels] = await Promise.all([
-      fetchJSON(`${BACKEND_URL}/api/rooms`),
-      fetchJSON(`${BACKEND_URL}/api/hostels`)
-    ]);
-    const ul = document.getElementById('rooms-list');
-    ul.innerHTML = '';
+    const res = await fetch(`${BACKEND_URL}/api/rooms`);
+    if (!res.ok) throw new Error(`Rooms fetch error: ${res.status}`);
+    const rooms = await res.json();
+    const list = document.getElementById('rooms-list');
+    if (!list) return;
+    list.innerHTML = '';
     rooms.forEach(r => {
-      const hostel = hostels.find(h => h.id === r.hostel_id)?.name || '—';
       const div = document.createElement('div');
       div.className = 'room-card';
       div.innerHTML = `
         <img src="${r.photo_url}" alt="${r.name}">
         <h3>${r.name}</h3>
-        <p>Price: ${r.price} / mo</p>
+        <p>Price: $${r.price} / mo</p>
         <p>Occupancy: ${r.occupancy_limit}</p>
-        <p>Hostel: ${hostel}</p>`;
-      ul.appendChild(div);
+        <button data-room-id="${r.id}">Apply</button>
+      `;
+      list.appendChild(div);
     });
+    document.querySelectorAll('[data-room-id]').forEach(btn =>
+      btn.addEventListener('click', () => {
+        const roomId = Number(btn.dataset.roomId);
+        const userId = Number(localStorage.getItem('userId'));
+        if (!userId) return alert('Please log in first.');
+        submitApplication(userId, roomId);
+      })
+    );
   } catch (err) {
-    console.error(err);
-    alert('Failed to load rooms.');
+    console.error('Error loading rooms:', err);
+    document.getElementById('rooms-list')?.insertAdjacentHTML('beforeend', '<li>Error loading rooms.</li>');
   }
 }
 
-// ——— Search ———————————————————————————————————————————————————————
-async function performSearch(event) {
-  event.preventDefault();
-  const type      = document.getElementById('search-type').value;
-  const location  = document.getElementById('search-location').value.trim().toLowerCase();
-  const minPrice  = Number(document.getElementById('search-min-price').value);
-  const maxPrice  = Number(document.getElementById('search-max-price').value);
-  const amenities = document.getElementById('search-amenities').value
-                     .split(',').map(a=>a.trim().toLowerCase()).filter(a=>a);
-
-  // Hostels filter
-  if (type === 'hostel' || type === 'all') {
-    let hostels = await fetchJSON(`${BACKEND_URL}/api/hostels`);
-    hostels = hostels.filter(h => {
-      if (location && !h.address?.toLowerCase().includes(location) && !h.name.toLowerCase().includes(location)) return false;
-      return true;
+async function submitApplication(userId, roomId) {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/applications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, room_id: roomId, status: 'Pending' })
     });
-    const ul = document.getElementById('hostels-list');
-    ul.innerHTML = '';
-    hostels.forEach(h => {
+    if (!res.ok) throw new Error(`Submit error: ${res.status}`);
+    alert('Application submitted!');
+  } catch (err) {
+    console.error('Error submitting application:', err);
+    alert('Failed to submit application.');
+  }
+}
+
+// ─── SEARCH ─────────────────────────────────────────────────────────────────
+async function performSearch(e) {
+  e.preventDefault();
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  if (!q) {
+    loadHostelsSection();
+    loadRoomsSection();
+    return;
+  }
+  const [hostels, rooms] = await Promise.all([
+    fetch(`${BACKEND_URL}/api/hostels`).then(r => r.json()),
+    fetch(`${BACKEND_URL}/api/rooms`).then(r => r.json())
+  ]);
+  // Filter hostels
+  const hList = document.getElementById('hostels-list');
+  if (hList) {
+    hList.innerHTML = '';
+    hostels.filter(h =>
+      h.name.toLowerCase().includes(q) ||
+      (h.address || h.description).toLowerCase().includes(q)
+    ).forEach(h => {
       const li = document.createElement('li');
-      li.innerHTML = `<h3>${h.name}</h3><p>${h.address || h.description}</p>`;
-      ul.appendChild(li);
+      li.textContent = `${h.name} – ${h.address || h.description}`;
+      hList.appendChild(li);
     });
   }
-
-  // Rooms filter
-  if (type === 'room' || type === 'all') {
-    let rooms = await fetchJSON(`${BACKEND_URL}/api/rooms`);
-    const hostels = await fetchJSON(`${BACKEND_URL}/api/hostels`);
-    rooms = rooms.map(r => ({
-      ...r,
-      hostel_name: hostels.find(h=>h.id===r.hostel_id)?.name || ''
-    })).filter(r => {
-      if (location && !(
-            r.hostel_name.toLowerCase().includes(location) ||
-            r.description.toLowerCase().includes(location) ||
-            r.name.toLowerCase().includes(location)
-          )) return false;
-      if (!isNaN(minPrice) && r.price < minPrice) return false;
-      if (!isNaN(maxPrice) && r.price > maxPrice) return false;
-      if (amenities.length) {
-        const ams = r.amenities || [];
-        if (!amenities.every(a=>ams.map(x=>x.toLowerCase()).includes(a))) return false;
-      }
-      return true;
-    });
-    const ul = document.getElementById('rooms-list');
-    ul.innerHTML = '';
-    rooms.forEach(r => {
+  // Filter rooms
+  const rList = document.getElementById('rooms-list');
+  if (rList) {
+    rList.innerHTML = '';
+    rooms.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      (r.description || '').toLowerCase().includes(q)
+    ).forEach(r => {
       const div = document.createElement('div');
       div.className = 'room-card';
       div.innerHTML = `
         <img src="${r.photo_url}" alt="${r.name}">
         <h3>${r.name}</h3>
-        <p>Price: ${r.price} / mo</p>
+        <p>Price: $${r.price} / mo</p>
         <p>Occupancy: ${r.occupancy_limit}</p>
-        <p>Hostel: ${r.hostel_name}</p>`;
-      ul.appendChild(div);
+        <button data-room-id="${r.id}">Apply</button>
+      `;
+      rList.appendChild(div);
     });
   }
 }
 
-function clearSearch(event) {
-  event.preventDefault();
-  document.getElementById('search-form').reset();
+function clearSearch() {
+  document.getElementById('search-input').value = '';
   loadHostelsSection();
   loadRoomsSection();
 }
 
-// ——— Dashboard Loader ———————————————————————————————————————————————————
+// ─── AUTH ───────────────────────────────────────────────────────────────────
+async function login(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  if (!email || !password) {
+    return alert('Please fill in both fields.');
+  }
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    if (!res.ok) {
+      const { error } = await res.json();
+      throw new Error(error || 'Invalid credentials');
+    }
+    const { token } = await res.json();
+    localStorage.setItem('token', token);
+    // Decode userId from JWT payload
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    localStorage.setItem('userId', payload.id);
+    window.location.href = 'dashboard.html';
+  } catch (err) {
+    console.error('Login failed:', err);
+    alert(`Login failed: ${err.message}`);
+  }
+}
+
+async function register(e) {
+  e.preventDefault();
+  const username = document.getElementById('name').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const phone    = document.getElementById('phone').value.trim();
+  const pwd      = document.getElementById('password').value.trim();
+  const confirm  = document.getElementById('confirm-password').value.trim();
+  if (!username || !email || !phone || !pwd || !confirm) {
+    return alert('All fields are required.');
+  }
+  if (pwd !== confirm) {
+    return alert('Passwords do not match.');
+  }
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/users`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ username, email, phone, password: pwd })
+    });
+    if (!res.ok) {
+      const { error } = await res.json();
+      throw new Error(error || 'Registration failed');
+    }
+    alert('Registration successful!');
+    window.location.href = 'login.html';
+  } catch (err) {
+    console.error('Registration failed:', err);
+    alert(`Registration failed: ${err.message}`);
+  }
+}
+
+// ─── DASHBOARD ──────────────────────────────────────────────────────────────
 async function loadDashboard() {
   const token = localStorage.getItem('token');
-  if (!token) {
-    return window.location.href = 'login.html';
-  }
+  if (!token) return window.location.href = 'login.html';
   try {
     const res = await fetch(`${BACKEND_URL}/api/dashboard`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!res.ok) throw new Error(`Status ${res.status}`);
+    if (!res.ok) throw new Error(`Dashboard error: ${res.status}`);
     const data = await res.json();
-
-    // Profile
     document.getElementById('student-name').textContent  = data.profile.username;
     document.getElementById('student-email').textContent = data.profile.email;
-
-    // Stats
     document.getElementById('total-applications').textContent    = data.stats.total ?? 0;
     document.getElementById('pending-applications').textContent  = data.stats.pending ?? 0;
     document.getElementById('accepted-applications').textContent = data.stats.accepted ?? 0;
     document.getElementById('rejected-applications').textContent = data.stats.rejected ?? 0;
-
-    // Hostels list on dashboard
-    const list = document.getElementById('hostels-list');
-    if (list) {
-      list.innerHTML = '';
-      data.hostels.forEach(h => {
-        const div = document.createElement('div');
-        div.className = 'hostel-card';
-        div.innerHTML = `<h3>${h.name}</h3><p>${h.address}</p>`;
-        list.appendChild(div);
-      });
-    }
-
-    // Recent activities
-    const actList = document.getElementById('recent-activities-list');
-    if (actList) {
-      actList.innerHTML = '';
-      data.activities.forEach(a => {
-        const li = document.createElement('li');
-        li.textContent = a;
-        actList.appendChild(li);
-      });
-    }
-
+    // Hostels & activities are rendered inline in dashboard.html
   } catch (err) {
     console.error('Dashboard load error:', err);
     alert('Failed to load dashboard.');
   }
 }
 
-// ——— DOM Ready —————————————————————————————————————————————————————
+// ─── INIT ─────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
+  const p = location.pathname;
+  // Home page
+  if (p.endsWith('index.html') || p === '/') {
+    loadHostelsSection();
+    loadRoomsSection();
+    document.getElementById('search-button')?.addEventListener('click', performSearch);
+    document.getElementById('clear-search-button')?.addEventListener('click', clearSearch);
+  }
+  // Student views
+  if (p.endsWith('hostels.html')) loadHostelsSection();
+  if (p.endsWith('rooms.html'))    loadRoomsSection();
+  if (p.endsWith('dashboard.html')) loadDashboard();
   // Auth forms
   document.getElementById('login-form')?.addEventListener('submit', login);
   document.getElementById('register-form')?.addEventListener('submit', register);
-
-  // Student pages
-  document.getElementById('hostels-list')  && loadHostelsSection();
-  document.getElementById('rooms-list')    && loadRoomsSection();
-  document.getElementById('search-form')   && (
-    document.getElementById('search-form').addEventListener('submit', performSearch),
-    document.getElementById('clear-search-button').addEventListener('click', clearSearch)
-  );
-  document.getElementById('student-name')  && loadDashboard();
 });
