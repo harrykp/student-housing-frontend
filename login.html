@@ -1,32 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Login | Student Housing</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
   <header>
     <h1>Login</h1>
     <nav class="navbar">
       <a href="index.html">Home</a>
-      <a href="register.html">Register</a>
+      <a href="rooms.html">Rooms</a>
+      <a href="hostels.html">Hostels</a>
+      <a href="applications.html">My Applications</a>
+      <a href="login.html" class="active">Login</a>
+      <a href="admin-login.html">Admin Login</a>
     </nav>
   </header>
 
   <main>
-    <form id="login-form" class="form">
-      <label>
-        Email
-        <input type="email" id="email" required />
-      </label>
-      <label>
-        Password
-        <input type="password" id="password" required />
-      </label>
-      <button type="submit">Login</button>
-    </form>
+    <section class="form-section">
+      <form id="login-form">
+        <label>
+          Email:
+          <input type="email" id="email" required />
+        </label>
+        <label>
+          Password:
+          <input type="password" id="password" required />
+        </label>
+        <button type="submit">Login</button>
+      </form>
+      <p>Don't have an account? <a href="register.html">Register</a></p>
+    </section>
   </main>
 
   <footer>
