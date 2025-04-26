@@ -1,163 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Application Form</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        header, footer {
-            text-align: center;
-            padding: 1rem;
-            background: #2e86de;
-            color: white;
-        }
-        header h1, footer p {
-            margin: 0;
-        }
-        .navbar {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 0;
-            padding: 0;
-            list-style: none;
-            background: #1e6ab9;
-        }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: background 0.3s ease;
-        }
-        .navbar a:hover {
-            background: #155a9c;
-        }
-        main {
-            padding: 2rem;
-        }
-        form {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #f9f9f9;
-            padding: 2rem;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-        input, textarea, select {
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            color: white;
-            background: #28a745;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        button:hover {
-            background: #218838;
-        }
-        button.reset {
-            background: #dc3545;
-        }
-        button.reset:hover {
-            background: #c82333;
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Apply for Housing | Student Housing</title>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-    <header>
-        <h1>Room Application Form</h1>
-        <nav>
-            <ul class="navbar">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="dashboard.html">Dashboard</a></li>
-            </ul>
-        </nav>
-    </header>
+  <header>
+    <h1>Apply for Housing</h1>
+    <nav class="navbar">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="applications.html">My Applications</a>
+    </nav>
+  </header>
 
-    <main>
-        <form id="application-form">
-            <label for="room-preference">Room Preference:</label>
-            <select id="room-preference" name="room-preference" required>
-                <option value="">Select a room type</option>
-                <option value="single">Single Room</option>
-                <option value="double">Double Room</option>
-                <option value="suite">Suite</option>
-            </select>
+  <main>
+    <form id="application-form" class="form">
+      <label>
+        Select Room
+        <select id="room-select"></select>
+      </label>
+      <label>
+        Preference / Notes
+        <textarea id="notes" rows="4"></textarea>
+      </label>
+      <button type="submit">Submit Application</button>
+    </form>
+  </main>
 
-            <label for="personal-details">Personal Details:</label>
-            <textarea id="personal-details" name="personal-details" rows="4" placeholder="Enter your personal details..." required></textarea>
+  <footer>
+    <p>© 2025 Student Housing System</p>
+  </footer>
 
-            <label for="additional-notes">Additional Notes:</label>
-            <textarea id="additional-notes" name="additional-notes" rows="3" placeholder="Any additional information or requests..."></textarea>
-
-            <div style="text-align: center;">
-                <button type="submit">Submit Application</button>
-                <button type="reset" class="reset">Reset</button>
-            </div>
-        </form>
-    </main>
-
-    <footer>
-        <p>© 2025 Student Housing System</p>
-    </footer>
-
-    <script src="app.js" defer></script>
-    <script>
-        document.getElementById('application-form').addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const roomPreference = document.getElementById('room-preference').value;
-            const personalDetails = document.getElementById('personal-details').value;
-            const additionalNotes = document.getElementById('additional-notes').value;
-
-            if (!roomPreference || !personalDetails) {
-                alert("Please fill in all required fields.");
-                return;
-            }
-
-            const confirmation = confirm("Do you want to submit your application?");
-            if (!confirmation) return;
-
-            try {
-                const response = await fetch('/api/applications', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        roomPreference,
-                        personalDetails,
-                        additionalNotes,
-                    }),
-                });
-
-                if (response.ok) {
-                    alert('Application submitted successfully!');
-                    window.location.href = 'dashboard.html';
-                } else {
-                    throw new Error('Application submission failed.');
-                }
-            } catch (error) {
-                alert(error.message);
-            }
+  <script>
+    // basic JS to populate room dropdown and handle submit
+    document.addEventListener('DOMContentLoaded', async () => {
+      const res = await fetch(`${BACKEND_URL}/api/rooms`);
+      const rooms = await res.json();
+      const sel = document.getElementById('room-select');
+      rooms.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.text = `${r.name} – ${r.occupancy_limit} ppl max`;
+        sel.appendChild(opt);
+      });
+      document.getElementById('application-form')
+        .addEventListener('submit', async e => {
+          e.preventDefault();
+          const userId = Number(localStorage.getItem('userId'));
+          const roomId = Number(sel.value);
+          const notes  = document.getElementById('notes').value.trim();
+          await submitApplication(userId, roomId, notes);
+          window.location.href = 'applications.html';
         });
-    </script>
+    });
+  </script>
+  <script src="app.js" defer></script>
 </body>
 </html>
