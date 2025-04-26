@@ -11,7 +11,7 @@
     <h1>Manage Applications</h1>
     <nav class="navbar">
       <a href="index.html">Front End</a>
-      <a href="admin.html">Home</a>
+      <a href="admin.html">Admin Home</a>
       <a href="admin-hostels.html">Hostels</a>
       <a href="admin-rooms.html">Rooms</a>
       <a href="admin-students.html">Students</a>
@@ -20,18 +20,23 @@
       <a href="#" id="logout-link">Logout</a>
     </nav>
   </header>
+
   <main>
     <table>
       <thead>
         <tr>
-          <th>ID</th><th>User</th><th>Room</th>
-          <th>Status</th><th>Applied At</th><th>Actions</th>
+          <th>ID</th><th>User ID</th><th>Room ID</th><th>Status</th>
+          <th>Applied At</th><th>Actions</th>
         </tr>
       </thead>
       <tbody id="applications-table-body"></tbody>
     </table>
   </main>
-  <footer><p>© 2025 Student Housing System</p></footer>
+
+  <footer>
+    <p>© 2025 Student Housing System</p>
+  </footer>
+
   <script src="admin.js" defer></script>
 </body>
 </html>
