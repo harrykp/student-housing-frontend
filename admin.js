@@ -63,7 +63,11 @@ async function openHostelForm(id = '') {
 
   if (id) {
     const res = await fetch(`${BACKEND_URL}/api/hostels/${id}`);
-    const h   = await res.json();
+    if (!res.ok) {
+      console.error(`Hostel ${id} not found. Status: ${res.status}`);
+      return alert('That hostel no longer exists.');
+    }
+    const h = await res.json();
     document.getElementById('hostel-id').value          = h.id;
     document.getElementById('hostel-name').value        = h.name;
     document.getElementById('hostel-description').value = h.description;
@@ -134,7 +138,11 @@ async function openRoomForm(id = '') {
 
   if (id) {
     const res = await fetch(`${BACKEND_URL}/api/rooms/${id}`);
-    const r   = await res.json();
+    if (!res.ok) {
+      console.error(`Room ${id} not found. Status: ${res.status}`);
+      return alert('That room no longer exists.');
+    }
+    const r = await res.json();
     document.getElementById('room-id').value           = r.id;
     document.getElementById('room-name').value         = r.name;
     document.getElementById('room-description').value  = r.description;
@@ -144,7 +152,6 @@ async function openRoomForm(id = '') {
     document.getElementById('room-photo').value        = r.photo_url;
   }
   openModal('room-form-modal');
-}
 
 async function saveRoom(e) {
   e.preventDefault();
