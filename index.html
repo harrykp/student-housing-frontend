@@ -6,7 +6,6 @@
   <title>Student Housing</title>
   <link rel="stylesheet" href="styles.css"/>
   <style>
-    /* Search row: fields side by side */
     #search-form {
       display: flex;
       flex-wrap: wrap;
@@ -36,45 +35,20 @@
   </header>
 
   <main>
-    <!-- Search Form -->
-    <section>
-      <form id="search-form">
-        <label>
-          Type
-          <select id="search-type">
-            <option value="all">All</option>
-            <option value="hostel">Hostels</option>
-            <option value="room">Rooms</option>
-          </select>
-        </label>
-        <label>
-          Location
-          <input type="text" id="search-location" placeholder="City or address"/>
-        </label>
-        <label>
-          Min Price
-          <input type="number" id="search-min-price" placeholder="0"/>
-        </label>
-        <label>
-          Max Price
-          <input type="number" id="search-max-price" placeholder="Any"/>
-        </label>
-        <label>
-          Amenities
-          <input type="text" id="search-amenities" placeholder="WiFi,Pool,..."/>
-        </label>
-        <button type="submit">Search</button>
-        <button type="button" id="clear-search-button">Clear</button>
-      </form>
-    </section>
+    <form id="search-form">
+      <label>
+        Search:
+        <input type="text" id="search-input" placeholder="Type to search…"/>
+      </label>
+      <button type="button" id="search-button">Search</button>
+      <button type="button" id="clear-search-button">Clear</button>
+    </form>
 
-    <!-- Hostels Section -->
     <section>
       <h2>Available Hostels</h2>
       <ul id="hostels-list"></ul>
     </section>
 
-    <!-- Rooms Section -->
     <section>
       <h2>Available Rooms</h2>
       <ul id="rooms-list" class="rooms-grid"></ul>
