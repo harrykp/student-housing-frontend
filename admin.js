@@ -2,24 +2,23 @@
 
 const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
-// -- Modal Helpers ---------------------------------------------------------
+// ——— Modal Helpers ————————————————————————————————————————————————
 function openModal(id) {
-  const modal = document.getElementById(id);
-  if (modal) modal.classList.add('active');
+  document.getElementById(id)?.classList.add('active');
 }
 function closeModal(id) {
-  const modal = document.getElementById(id);
-  if (modal) modal.classList.remove('active');
+  document.getElementById(id)?.classList.remove('active');
 }
 
-// -- Authentication -------------------------------------------------------
+// ——— Auth —————————————————————————————————————————————————————————
 function logout() {
   localStorage.clear();
   window.location.href = 'index.html';
 }
 
-// -- Hostels --------------------------------------------------------------
+// ——— HOSTELS ————————————————————————————————————————————————————————
 async function loadHostelsAdmin() {
+  // fetch both lists
   const [hRes, rRes] = await Promise.all([
     fetch(`${BACKEND_URL}/api/hostels`),
     fetch(`${BACKEND_URL}/api/rooms`)
@@ -35,6 +34,7 @@ async function loadHostelsAdmin() {
       .filter(r => r.hostel_id === h.id)
       .map(r => r.name)
       .join(', ') || '—';
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${h.id}</td>
@@ -52,10 +52,12 @@ async function loadHostelsAdmin() {
 }
 
 async function openHostelForm(id = '') {
+  // clear
   ['hostel-id','hostel-name','hostel-description','hostel-occupancy','hostel-photo']
     .forEach(f => document.getElementById(f).value = '');
 
   if (id) {
+    // prefill
     const res = await fetch(`${BACKEND_URL}/api/hostels/${id}`);
     const h   = await res.json();
     document.getElementById('hostel-id').value          = h.id;
@@ -78,7 +80,10 @@ async function saveHostel(e) {
   };
   await fetch(
     `${BACKEND_URL}/api/hostels${id ? `/${id}` : ''}`,
-    { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) }
+    { method: id ? 'PUT' : 'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    }
   );
   closeModal('hostel-form-modal');
   loadHostelsAdmin();
@@ -86,11 +91,11 @@ async function saveHostel(e) {
 
 async function deleteHostel(id) {
   if (!confirm('Delete this hostel?')) return;
-  await fetch(`${BACKEND_URL}/api/hostels/${id}`, { method: 'DELETE' });
+  await fetch(`${BACKEND_URL}/api/hostels/${id}`, { method:'DELETE' });
   loadHostelsAdmin();
 }
 
-// -- Rooms ----------------------------------------------------------------
+// ——— ROOMS ————————————————————————————————————————————————————————————
 async function loadRoomsAdmin() {
   const [rRes, hRes] = await Promise.all([
     fetch(`${BACKEND_URL}/api/rooms`),
@@ -128,14 +133,14 @@ async function openRoomForm(id = '') {
 
   if (id) {
     const res = await fetch(`${BACKEND_URL}/api/rooms/${id}`);
-    const rm  = await res.json();
-    document.getElementById('room-id').value         = rm.id;
-    document.getElementById('room-name').value       = rm.name;
-    document.getElementById('room-description').value= rm.description;
-    document.getElementById('room-price').value      = rm.price;
-    document.getElementById('room-occupancy').value  = rm.occupancy_limit;
-    document.getElementById('room-hostel-id').value  = rm.hostel_id;
-    document.getElementById('room-photo').value      = rm.photo_url;
+    const r   = await res.json();
+    document.getElementById('room-id').value           = r.id;
+    document.getElementById('room-name').value         = r.name;
+    document.getElementById('room-description').value  = r.description;
+    document.getElementById('room-price').value        = r.price;
+    document.getElementById('room-occupancy').value    = r.occupancy_limit;
+    document.getElementById('room-hostel-id').value    = r.hostel_id;
+    document.getElementById('room-photo').value        = r.photo_url;
   }
   openModal('room-form-modal');
 }
@@ -153,7 +158,10 @@ async function saveRoom(e) {
   };
   await fetch(
     `${BACKEND_URL}/api/rooms${id ? `/${id}` : ''}`,
-    { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) }
+    { method: id ? 'PUT' : 'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    }
   );
   closeModal('room-form-modal');
   loadRoomsAdmin();
@@ -161,37 +169,42 @@ async function saveRoom(e) {
 
 async function deleteRoom(id) {
   if (!confirm('Delete this room?')) return;
-  await fetch(`${BACKEND_URL}/api/rooms/${id}`, { method: 'DELETE' });
+  await fetch(`${BACKEND_URL}/api/rooms/${id}`, { method:'DELETE' });
   loadRoomsAdmin();
 }
 
-// -- Initialization -------------------------------------------------------
+// ——— Initialization ——————————————————————————————————————————————————
 window.addEventListener('DOMContentLoaded', () => {
-  // Logout
   document.getElementById('logout-link')?.addEventListener('click', logout);
 
-  // Hostels
-  if (location.pathname.endsWith('admin-hostels.html')) {
+  // Hostels page
+  if (location.pathname.includes('admin-hostels.html')) {
     loadHostelsAdmin();
-    // Delegated events ensure Edit/Delete always work
+    // delegated click on tbody
     document.getElementById('hostels-table-body')?.addEventListener('click', e => {
-      if (e.target.matches('.edit-hostel')) openHostelForm(e.target.dataset.id);
-      if (e.target.matches('.delete-hostel')) deleteHostel(e.target.dataset.id);
+      const t = e.target;
+      if (t.matches('.edit-hostel'))   openHostelForm(t.dataset.id);
+      if (t.matches('.delete-hostel')) deleteHostel(t.dataset.id);
     });
     document.getElementById('create-hostel-button')?.addEventListener('click', () => openHostelForm());
-    document.getElementById('hostel-form-cancel')?.addEventListener('click', e => { e.preventDefault(); closeModal('hostel-form-modal'); });
+    document.getElementById('hostel-form-cancel')?.addEventListener('click', e => {
+      e.preventDefault(); closeModal('hostel-form-modal');
+    });
     document.getElementById('hostel-form')?.addEventListener('submit', saveHostel);
   }
 
-  // Rooms
-  if (location.pathname.endsWith('admin-rooms.html')) {
+  // Rooms page
+  if (location.pathname.includes('admin-rooms.html')) {
     loadRoomsAdmin();
     document.getElementById('rooms-table-body')?.addEventListener('click', e => {
-      if (e.target.matches('.edit-room')) openRoomForm(e.target.dataset.id);
-      if (e.target.matches('.delete-room')) deleteRoom(e.target.dataset.id);
+      const t = e.target;
+      if (t.matches('.edit-room'))   openRoomForm(t.dataset.id);
+      if (t.matches('.delete-room')) deleteRoom(t.dataset.id);
     });
     document.getElementById('create-room-button')?.addEventListener('click', () => openRoomForm());
-    document.getElementById('room-form-cancel')?.addEventListener('click', e => { e.preventDefault(); closeModal('room-form-modal'); });
+    document.getElementById('room-form-cancel')?.addEventListener('click', e => {
+      e.preventDefault(); closeModal('room-form-modal');
+    });
     document.getElementById('room-form')?.addEventListener('submit', saveRoom);
   }
 });
