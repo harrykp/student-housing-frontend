@@ -1,211 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Available Rooms</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        header, footer {
-            text-align: center;
-            padding: 1rem;
-            background: #2e86de;
-            color: white;
-        }
-        header h1, footer p {
-            margin: 0;
-        }
-        .navbar {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 0;
-            padding: 0;
-            list-style: none;
-            background: #1e6ab9;
-        }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: background 0.3s ease;
-        }
-        .navbar a:hover {
-            background: #155a9c;
-        }
-        main {
-            padding: 2rem;
-        }
-        #filters {
-            margin-bottom: 2rem;
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        #filters input, #filters select {
-            padding: 0.5rem;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        #rooms-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .room-card {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 1rem;
-            background: #f9f9f9;
-            width: calc(33.333% - 1rem);
-            box-sizing: border-box;
-        }
-        .room-card h3 {
-            margin: 0 0 0.5rem;
-        }
-        .room-card p {
-            margin: 0.5rem 0;
-        }
-        .room-card button {
-            margin-top: 1rem;
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            color: white;
-            background: #28a745;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .room-card button:hover {
-            background: #218838;
-        }
-        @media (max-width: 768px) {
-            .room-card {
-                width: calc(50% - 1rem);
-            }
-        }
-        @media (max-width: 480px) {
-            .room-card {
-                width: 100%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Rooms | Student Housing</title>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-    <header>
-        <h1>Available Rooms</h1>
-        <nav>
-            <ul class="navbar">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="applications.html">Applications</a></li>
-                <li><a href="hostels.html">Hostels</a></li>
-            </ul>
-        </nav>
-    </header>
+  <header>
+    <h1>Rooms</h1>
+    <nav class="navbar">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="hostels.html">Hostels</a>
+      <a href="applications.html">My Applications</a>
+      <a href="rooms.html" class="active">Rooms</a>
+    </nav>
+  </header>
 
-    <main>
-        <!-- Filters Section -->
-        <section id="filters">
-            <select id="room-type-filter">
-                <option value="">Room Type</option>
-                <option value="Single">Single</option>
-                <option value="Double">Double</option>
-                <option value="Suite">Suite</option>
-            </select>
-            <input type="number" id="price-min" placeholder="Min Price">
-            <input type="number" id="price-max" placeholder="Max Price">
-            <select id="availability-filter">
-                <option value="">Availability</option>
-                <option value="Available">Available</option>
-                <option value="Occupied">Occupied</option>
-            </select>
-            <button id="apply-filters">Apply Filters</button>
-        </section>
+  <main>
+    <ul id="rooms-list">
+      <!-- app.js → loadRooms() will insert cards:
+        <div class="room-card">
+          <img src="…" alt="Room photo">
+          <h3>Room Type</h3>
+          <p>Price: $X / mo</p>
+          <p>Occupancy limit: Y</p>
+          <button data-room-id="…">Apply</button>
+        </div>
+      -->
+    </ul>
+  </main>
 
-        <!-- Rooms List -->
-        <ul id="rooms-list">
-            <!-- Rooms will be dynamically loaded here -->
-        </ul>
-    </main>
+  <footer>
+    <p>© 2025 Student Housing System</p>
+  </footer>
 
-    <footer>
-        <p>© 2025 Student Housing System</p>
-    </footer>
-
-    <script src="app.js" defer></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            loadRooms();
-
-            document.getElementById('apply-filters').addEventListener('click', () => {
-                const roomType = document.getElementById('room-type-filter').value;
-                const priceMin = parseFloat(document.getElementById('price-min').value) || 0;
-                const priceMax = parseFloat(document.getElementById('price-max').value) || Infinity;
-                const availability = document.getElementById('availability-filter').value;
-
-                loadRooms({ roomType, priceMin, priceMax, availability });
-            });
-        });
-
-        async function loadRooms(filters = {}) {
-            const roomsList = document.getElementById('rooms-list');
-            roomsList.innerHTML = '<li>Loading...</li>';
-
-            try {
-                const response = await fetch('/api/rooms');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch rooms');
-                }
-
-                const rooms = await response.json();
-                roomsList.innerHTML = '';
-
-                const filteredRooms = rooms.filter(room => {
-                    const matchesType = !filters.roomType || room.type === filters.roomType;
-                    const matchesPrice = room.price >= filters.priceMin && room.price <= filters.priceMax;
-                    const matchesAvailability = !filters.availability || room.availability === filters.availability;
-
-                    return matchesType && matchesPrice && matchesAvailability;
-                });
-
-                if (filteredRooms.length === 0) {
-                    roomsList.innerHTML = '<li>No rooms found</li>';
-                    return;
-                }
-
-                filteredRooms.forEach(room => {
-                    const li = document.createElement('li');
-                    li.className = 'room-card';
-                    li.innerHTML = `
-                        <h3>Room ${room.number}</h3>
-                        <p>Type: ${room.type}</p>
-                        <p>Price: $${room.price}</p>
-                        <p>Status: ${room.availability}</p>
-                        <button onclick="reserveRoom(${room.id})">Reserve Now</button>
-                    `;
-                    roomsList.appendChild(li);
-                });
-            } catch (error) {
-                console.error('Error loading rooms:', error);
-                roomsList.innerHTML = '<li>Error loading rooms</li>';
-            }
-        }
-
-        function reserveRoom(roomId) {
-            alert(`Redirecting to reservation for Room ID: ${roomId}`);
-            // Implement navigation to reservation or application form
-        }
-    </script>
+  <script src="app.js" defer></script>
 </body>
 </html>
