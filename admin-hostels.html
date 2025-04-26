@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Admin — Hostels</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
   <header>
@@ -26,13 +26,8 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Description</th>
-          <th>Occupancy</th>
-          <th>Rooms</th>
-          <th>Photo</th>
-          <th>Actions</th>
+          <th>ID</th><th>Name</th><th>Description</th><th>Occupancy</th>
+          <th>Rooms</th><th>Photo</th><th>Actions</th>
         </tr>
       </thead>
       <tbody id="hostels-table-body"></tbody>
@@ -40,11 +35,11 @@
 
     <div id="hostel-form-modal" class="modal">
       <form id="hostel-form" class="modal-form">
-        <input type="hidden" id="hostel-id" />
-        <label>Name: <input type="text" id="hostel-name" required /></label>
+        <input type="hidden" id="hostel-id"/>
+        <label>Name: <input type="text" id="hostel-name" required/></label>
         <label>Description: <textarea id="hostel-description" required></textarea></label>
-        <label>Occupancy: <input type="number" id="hostel-occupancy" required /></label>
-        <label>Photo URL: <input type="url" id="hostel-photo" required /></label>
+        <label>Occupancy: <input type="number" id="hostel-occupancy" required/></label>
+        <label>Photo URL: <input type="url" id="hostel-photo" required/></label>
         <div class="modal-actions">
           <button type="submit">Save</button>
           <button type="button" id="hostel-form-cancel">Cancel</button>
