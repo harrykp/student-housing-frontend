@@ -1,104 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        header, footer {
-            text-align: center;
-            padding: 1rem;
-            background: #2e86de;
-            color: white;
-        }
-        header h1, footer p {
-            margin: 0;
-        }
-        main {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: calc(100vh - 120px);
-        }
-        form {
-            max-width: 400px;
-            width: 100%;
-            background: #f9f9f9;
-            padding: 2rem;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            width: 100%;
-            padding: 0.75rem;
-            font-size: 1rem;
-            color: white;
-            background: #28a745;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        button:hover {
-            background: #218838;
-        }
-        .forgot-password {
-            text-align: center;
-            margin-top: 1rem;
-        }
-        .forgot-password a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .forgot-password a:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login | Student Housing</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <header>
-        <h1>Login</h1>
-        <button onclick="window.location.href='index.html'" style="margin-top: 1rem;">Home</button>
-    </header>
+  <header>
+    <h1>Login</h1>
+    <nav class="navbar">
+      <a href="index.html">Home</a>
+      <a href="register.html">Register</a>
+    </nav>
+  </header>
 
-    <main>
-        <form id="login-form">
-            <label for="email">Email or Username:</label>
-            <input type="text" id="email" name="email" placeholder="Enter your email or username" required>
+  <main>
+    <form id="login-form" class="form">
+      <label>
+        Email
+        <input type="email" id="email" required />
+      </label>
+      <label>
+        Password
+        <input type="password" id="password" required />
+      </label>
+      <button type="submit">Login</button>
+    </form>
+  </main>
 
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+  <footer>
+    <p>© 2025 Student Housing System</p>
+  </footer>
 
-            <button type="submit">Login</button>
-
-            <div class="forgot-password">
-                <a href="forgot-password.html">Forgot Password?</a>
-            </div>
-        </form>
-    </main>
-
-    <footer>
-        <p>© 2025 Student Housing System</p>
-    </footer>
-
-    <script src="app.js" defer></script>
-    
+  <script src="app.js" defer></script>
 </body>
 </html>
