@@ -1,5 +1,5 @@
 // app.js (entry point for your frontend)
- 
+
 // Backend Base URL
 const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
@@ -17,7 +17,6 @@ async function loadHostels() {
     const res = await fetch(`${BACKEND_URL}/api/hostels`);
     if (!res.ok) throw new Error(`Hostels fetch error: ${res.status}`);
     const hostels = await res.json();
-
     const list = document.getElementById('hostels-list');
     if (!list) return;
     list.innerHTML = '';
@@ -46,12 +45,10 @@ async function loadDashboard() {
     });
     if (!res.ok) throw new Error(`Dashboard fetch error: ${res.status}`);
     const data = await res.json();
-
     if (data.error) {
       console.error('API error:', data.error);
       return;
     }
-
     populateProfile(data.profile || {});
     populateStats(data.stats || {});
     populateHostels(data.hostels || []);
@@ -112,37 +109,42 @@ async function submitApplication(userId, roomId) {
   }
 }
 
+// **User Authentication Handlers**
 async function login(event) {
   event.preventDefault();
-  const email    = document.getElementById('email').value.trim();
+  const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
   if (!email || !password) {
     alert('Please fill in both fields.');
     return;
   }
   try {
-    // include role so authController.login will accept it
     const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, role: 'student' })
+      body: JSON.stringify({ email, password })
     });
-    if (!res.ok) throw new Error('Invalid credentials');
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || 'Login failed');
+    }
+    const { token } = await res.json();
+    localStorage.setItem('token', token);
     alert('Login successful!');
     window.location.href = 'dashboard.html';
   } catch (err) {
-    console.error(err);
-    alert('Login failed. Please check your credentials and try again.');
+    console.error('Login error:', err);
+    alert(`Login failed: ${err.message}`);
   }
 }
 
 async function register(event) {
   event.preventDefault();
   const username = document.getElementById('name').value.trim();
-  const email    = document.getElementById('email').value.trim();
-  const phone    = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
   const password = document.getElementById('password').value.trim();
-  if (!username || !email || !password) {
+  if (!username || !email || !phone || !password) {
     alert('All fields are required.');
     return;
   }
@@ -152,15 +154,19 @@ async function register(event) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, phone, password })
     });
-    if (!res.ok) throw new Error('Registration failed');
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || 'Registration failed');
+    }
     alert('Registration successful!');
     window.location.href = 'login.html';
   } catch (err) {
-    console.error(err);
-    alert('Registration failed. Please try again.');
+    console.error('Register error:', err);
+    alert(`Registration failed: ${err.message}`);
   }
 }
 
+// DOM-ready: attach all form and button handlers
 window.addEventListener('DOMContentLoaded', () => {
   loadHostels();
   if (localStorage.getItem('token')) {
@@ -179,4 +185,3 @@ window.addEventListener('DOMContentLoaded', () => {
     // implement search logic here
   });
 });
-
