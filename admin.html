@@ -1,107 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Admin specific styles */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
-        header, footer {
-            background-color: #2e86de;
-            color: white;
-            text-align: center;
-            padding: 1rem;
-        }
-        nav ul {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            list-style: none;
-            padding: 0;
-        }
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-        }
-        main {
-            padding: 1rem;
-        }
-        .section {
-            margin-bottom: 2rem;
-        }
-        .table-container {
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1rem;
-        }
-        table th, table td {
-            border: 1px solid #ccc;
-            padding: 0.5rem;
-            text-align: left;
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin Panel | Student Housing</title>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-    <header>
-        <h1>Admin Dashboard</h1>
-        <nav>
-            <ul>
-                <li><a href="admin.html">Dashboard</a></li>
-                <li><a href="manage-hostels.html">Manage Hostels</a></li>
-                <li><a href="manage-rooms.html">Manage Rooms</a></li>
-                <li><a href="manage-users.html">Manage Users</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <section class="section">
-            <h2>Hostels</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Address</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="hostels-table">
-                        <tr><td colspan="3">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+  <header>
+    <h1>Admin Dashboard</h1>
+    <nav class="navbar">
+      <a href="admin.html" class="active">Home</a>
+      <a href="admin-hostels.html">Hostels</a>
+      <a href="admin-rooms.html">Rooms</a>
+      <a href="admin-students.html">Students</a>
+      <a href="admin-applications.html">Applications</a>
+      <a href="admin-notifications.html">Notifications</a>
+    </nav>
+  </header>
 
-        <section class="section">
-            <h2>Users</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table">
-                        <tr><td colspan="4">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2025 Student Housing System</p>
-    </footer>
-    <script src="app.js" defer></script>
+  <main>
+    <section>
+      <h2>Welcome, Admin</h2>
+      <p>Use the links above to manage the system.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Student Housing System</p>
+  </footer>
+
+  <script src="admin.js" defer></script>
 </body>
 </html>
