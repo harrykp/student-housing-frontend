@@ -2,7 +2,7 @@
 
 const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
-// ——— Modal Helpers ————————————————————————————————————————————————
+// ─── Modal Helpers ─────────────────────────────────────────────────────────
 function openModal(id) {
   document.getElementById(id)?.classList.add('active');
 }
@@ -10,13 +10,13 @@ function closeModal(id) {
   document.getElementById(id)?.classList.remove('active');
 }
 
-// ——— Auth —————————————————————————————————————————————————————————
+// ─── Auth ──────────────────────────────────────────────────────────────────
 function logout() {
   localStorage.clear();
   window.location.href = 'index.html';
 }
 
-// ——— HOSTELS ————————————————————————————————————————————————————————
+// ─── HOSTELS ────────────────────────────────────────────────────────────────
 async function loadHostelsAdmin() {
   const [hRes, rRes] = await Promise.all([
     fetch(`${BACKEND_URL}/api/hostels`),
@@ -28,10 +28,7 @@ async function loadHostelsAdmin() {
   tbody.innerHTML = '';
 
   hostels.forEach(h => {
-    const linked = rooms
-      .filter(r => r.hostel_id === h.id)
-      .map(r => r.name)
-      .join(', ') || '—';
+    const linked = rooms.filter(r => r.hostel_id === h.id).map(r => r.name).join(', ') || '—';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${h.id}</td>
@@ -54,7 +51,7 @@ async function openHostelForm(id = '') {
 
   if (id) {
     const res = await fetch(`${BACKEND_URL}/api/hostels/${id}`);
-    if (!res.ok) return alert('Hostel not found.');
+    if (!res.ok) return alert('That hostel no longer exists.');
     const h = await res.json();
     document.getElementById('hostel-id').value          = h.id;
     document.getElementById('hostel-name').value        = h.name;
@@ -92,7 +89,7 @@ async function deleteHostel(id) {
   loadHostelsAdmin();
 }
 
-// ——— ROOMS ————————————————————————————————————————————————————————————
+// ─── ROOMS ──────────────────────────────────────────────────────────────────
 async function loadRoomsAdmin() {
   const [rRes, hRes] = await Promise.all([
     fetch(`${BACKEND_URL}/api/rooms`),
@@ -128,7 +125,7 @@ async function openRoomForm(id = '') {
 
   if (id) {
     const res = await fetch(`${BACKEND_URL}/api/rooms/${id}`);
-    if (!res.ok) return alert('Room not found.');
+    if (!res.ok) return alert('That room no longer exists.');
     const r = await res.json();
     document.getElementById('room-id').value           = r.id;
     document.getElementById('room-name').value         = r.name;
@@ -170,41 +167,36 @@ async function deleteRoom(id) {
   loadRoomsAdmin();
 }
 
-// ——— Initialization ——————————————————————————————————————————————————
+// ─── INIT ──────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  // Logout always available
   document.getElementById('logout-link')?.addEventListener('click', logout);
 
-  // If the hostels table is present, wire up its logic
-  const hostelsTable = document.getElementById('hostels-table-body');
-  if (hostelsTable) {
+  const ht = document.getElementById('hostels-table-body');
+  if (ht) {
     loadHostelsAdmin();
-    hostelsTable.addEventListener('click', e => {
-      const btn = e.target;
-      if (btn.matches('.edit-hostel'))   openHostelForm(btn.dataset.id);
-      if (btn.matches('.delete-hostel')) deleteHostel(btn.dataset.id);
+    ht.addEventListener('click', e => {
+      const b = e.target;
+      if (b.matches('.edit-hostel'))   openHostelForm(b.dataset.id);
+      if (b.matches('.delete-hostel')) deleteHostel(b.dataset.id);
     });
     document.getElementById('create-hostel-button')?.addEventListener('click', () => openHostelForm());
     document.getElementById('hostel-form-cancel')?.addEventListener('click', e => {
-      e.preventDefault();
-      closeModal('hostel-form-modal');
+      e.preventDefault(); closeModal('hostel-form-modal');
     });
     document.getElementById('hostel-form')?.addEventListener('submit', saveHostel);
   }
 
-  // If the rooms table is present, wire up its logic
-  const roomsTable = document.getElementById('rooms-table-body');
-  if (roomsTable) {
+  const rt = document.getElementById('rooms-table-body');
+  if (rt) {
     loadRoomsAdmin();
-    roomsTable.addEventListener('click', e => {
-      const btn = e.target;
-      if (btn.matches('.edit-room'))   openRoomForm(btn.dataset.id);
-      if (btn.matches('.delete-room')) deleteRoom(btn.dataset.id);
+    rt.addEventListener('click', e => {
+      const b = e.target;
+      if (b.matches('.edit-room'))   openRoomForm(b.dataset.id);
+      if (b.matches('.delete-room')) deleteRoom(b.dataset.id);
     });
     document.getElementById('create-room-button')?.addEventListener('click', () => openRoomForm());
     document.getElementById('room-form-cancel')?.addEventListener('click', e => {
-      e.preventDefault();
-      closeModal('room-form-modal');
+      e.preventDefault(); closeModal('room-form-modal');
     });
     document.getElementById('room-form')?.addEventListener('submit', saveRoom);
   }
