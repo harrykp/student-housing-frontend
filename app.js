@@ -1,7 +1,7 @@
 // app.js (entry point for your frontend)
  
 // Backend Base URL
-default const BACKEND_URL = 'https://student-housing-backend.onrender.com';
+const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
 // Utility to set text content safely
 function setTextContent(id, text) {
@@ -140,6 +140,7 @@ async function register(event) {
   event.preventDefault();
   const username = document.getElementById('name').value.trim();
   const email    = document.getElementById('email').value.trim();
+  const phone    = document.getElementById('phone').value.trim();
   const password = document.getElementById('password').value.trim();
   if (!username || !email || !password) {
     alert('All fields are required.');
@@ -149,7 +150,7 @@ async function register(event) {
     const res = await fetch(`${BACKEND_URL}/api/users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password })
+      body: JSON.stringify({ username, email, phone, password })
     });
     if (!res.ok) throw new Error('Registration failed');
     alert('Registration successful!');
