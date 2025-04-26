@@ -7,14 +7,15 @@
   <link rel="stylesheet" href="styles.css"/>
   <style>
     /* Stats row: boxes side by side */
-    .stats-section .stats {
+    .stats {
       display: flex;
       gap: 2rem;
       justify-content: center;
       flex-wrap: wrap;
     }
-    .stats-section .stat {
+    .stat {
       flex: 1 1 120px;
+      text-align: center;
     }
   </style>
 </head>
@@ -31,14 +32,14 @@
 
   <main>
     <!-- Profile -->
-    <section class="profile-section">
+    <section>
       <h2>Welcome</h2>
       <p>Name: <span id="student-name">Loading...</span></p>
       <p>Email: <span id="student-email">Loading...</span></p>
     </section>
 
     <!-- Stats -->
-    <section class="stats-section">
+    <section>
       <h2>Your Stats</h2>
       <div class="stats">
         <div class="stat">
@@ -60,14 +61,14 @@
       </div>
     </section>
 
-    <!-- Available Hostels -->
-    <section class="hostels-section">
+    <!-- Hostels in Dashboard -->
+    <section>
       <h2>Available Hostels</h2>
       <div id="hostels-list">Loading...</div>
     </section>
 
     <!-- Recent Activities -->
-    <section class="recent-activities">
+    <section>
       <h2>Recent Activities</h2>
       <ul id="recent-activities-list">
         <li>Loading...</li>
