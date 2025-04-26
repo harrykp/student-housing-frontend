@@ -3,58 +3,48 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Admin — Hostels | Student Housing</title>
+  <title>Admin — Hostels</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
   <header>
-    <h1>Admin Dashboard</h1>
+    <h1>Manage Hostels</h1>
     <nav class="navbar">
+      <a href="index.html">Front End</a>
       <a href="admin.html">Home</a>
       <a href="admin-hostels.html" class="active">Hostels</a>
       <a href="admin-rooms.html">Rooms</a>
       <a href="admin-students.html">Students</a>
       <a href="admin-applications.html">Applications</a>
       <a href="admin-notifications.html">Notifications</a>
+      <a href="#" id="logout-link">Logout</a>
     </nav>
   </header>
-
   <main>
-    <section>
-      <button id="create-hostel-button">+ New Hostel</button>
-    </section>
+    <button id="create-hostel-button">+ New Hostel</button>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Name</th><th>Description</th>
+          <th>Occupancy</th><th>Photo</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="hostels-table-body"></tbody>
+    </table>
 
-    <section>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Occupancy Limit</th>
-            <th>Photo URL</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="hostels-table-body"></tbody>
-      </table>
-    </section>
-
-    <div id="hostel-form-modal" class="modal" style="display:none;">
+    <div id="hostel-form-modal" class="modal">
       <form id="hostel-form">
-        <input type="hidden" id="hostel-id" />
-        <label>Name<input type="text" id="hostel-name" required /></label>
+        <input type="hidden" id="hostel-id"/>
+        <label>Name<input type="text" id="hostel-name" required/></label>
         <label>Description<textarea id="hostel-description" required></textarea></label>
-        <label>Occupancy Limit<input type="number" id="hostel-occupancy" required /></label>
-        <label>Photo URL<input type="url" id="hostel-photo" required /></label>
+        <label>Occupancy<input type="number" id="hostel-occupancy" required/></label>
+        <label>Photo URL<input type="url" id="hostel-photo" required/></label>
         <button type="submit">Save</button>
         <button type="button" id="hostel-form-cancel">Cancel</button>
       </form>
     </div>
   </main>
-
   <footer><p>© 2025 Student Housing System</p></footer>
   <script src="admin.js" defer></script>
 </body>
 </html>
-
