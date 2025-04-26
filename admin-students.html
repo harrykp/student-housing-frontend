@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin — Students | Student Housing</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <header>
+    <h1>Admin Dashboard</h1>
+    <nav class="navbar">
+      <a href="admin.html">Home</a>
+      <a href="admin-hostels.html">Hostels</a>
+      <a href="admin-rooms.html">Rooms</a>
+      <a href="admin-students.html" class="active">Students</a>
+      <a href="admin-applications.html">Applications</a>
+      <a href="admin-notifications.html">Notifications</a>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="students-table-body"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer><p>© 2025 Student Housing System</p></footer>
+  <script src="admin.js" defer></script>
+</body>
+</html>
