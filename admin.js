@@ -5,12 +5,11 @@ const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 // -- Modal Helpers ---------------------------------------------------------
 function openModal(id) {
   const modal = document.getElementById(id);
-  if (modal) modal.style.display = 'flex';
+  if (modal) modal.classList.add('active');
 }
-
 function closeModal(id) {
   const modal = document.getElementById(id);
-  if (modal) modal.style.display = 'none';
+  if (modal) modal.classList.remove('active');
 }
 
 // -- Authentication -------------------------------------------------------
@@ -21,7 +20,7 @@ function logout() {
 
 // -- Hostels --------------------------------------------------------------
 async function loadHostelsAdmin() {
-  // fetch hostels and rooms to link
+  // Fetch hostels and all rooms for linking
   const [hRes, rRes] = await Promise.all([
     fetch(`${BACKEND_URL}/api/hostels`),
     fetch(`${BACKEND_URL}/api/rooms`)
@@ -53,12 +52,12 @@ async function loadHostelsAdmin() {
     tbody.appendChild(tr);
   });
 
-  document.querySelectorAll('.edit-hostel').forEach(btn => {
-    btn.addEventListener('click', () => openHostelForm(btn.dataset.id));
-  });
-  document.querySelectorAll('.delete-hostel').forEach(btn => {
-    btn.addEventListener('click', () => deleteHostel(btn.dataset.id));
-  });
+  document.querySelectorAll('.edit-hostel').forEach(btn =>
+    btn.addEventListener('click', () => openHostelForm(btn.dataset.id))
+  );
+  document.querySelectorAll('.delete-hostel').forEach(btn =>
+    btn.addEventListener('click', () => deleteHostel(btn.dataset.id))
+  );
 }
 
 async function openHostelForm(id = '') {
@@ -87,13 +86,14 @@ async function saveHostel(e) {
     occupancy_limit: Number(document.getElementById('hostel-occupancy').value),
     photo_url:       document.getElementById('hostel-photo').value.trim()
   };
-  const url    = `${BACKEND_URL}/api/hostels${id ? `/${id}` : ''}`;
-  const method = id ? 'PUT' : 'POST';
-  await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  await fetch(
+    `${BACKEND_URL}/api/hostels${id ? `/${id}` : ''}`,
+    {
+      method:  id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
+    }
+  );
   closeModal('hostel-form-modal');
   loadHostelsAdmin();
 }
@@ -106,12 +106,19 @@ async function deleteHostel(id) {
 
 // -- Rooms ----------------------------------------------------------------
 async function loadRoomsAdmin() {
-  const res = await fetch(`${BACKEND_URL}/api/rooms`);
-  const rooms = await res.json();
+  // Fetch rooms and hostels for linking
+  const [rRes, hRes] = await Promise.all([
+    fetch(`${BACKEND_URL}/api/rooms`),
+    fetch(`${BACKEND_URL}/api/hostels`)
+  ]);
+  const rooms   = await rRes.json();
+  const hostels = await hRes.json();
+
   const tbody = document.getElementById('rooms-table-body');
   tbody.innerHTML = '';
 
   rooms.forEach(r => {
+    const hostelName = (hostels.find(h => h.id === r.hostel_id) || {}).name || '—';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${r.id}</td>
@@ -119,7 +126,7 @@ async function loadRoomsAdmin() {
       <td>${r.description}</td>
       <td>${r.price}</td>
       <td>${r.occupancy_limit}</td>
-      <td>${r.hostel_id}</td>
+      <td>${hostelName}</td>
       <td><a href="${r.photo_url}" target="_blank">View</a></td>
       <td>
         <button class="edit-room" data-id="${r.id}">Edit</button>
@@ -128,12 +135,12 @@ async function loadRoomsAdmin() {
     tbody.appendChild(tr);
   });
 
-  document.querySelectorAll('.edit-room').forEach(btn => {
-    btn.addEventListener('click', () => openRoomForm(btn.dataset.id));
-  });
-  document.querySelectorAll('.delete-room').forEach(btn => {
-    btn.addEventListener('click', () => deleteRoom(btn.dataset.id));
-  });
+  document.querySelectorAll('.edit-room').forEach(btn =>
+    btn.addEventListener('click', () => openRoomForm(btn.dataset.id))
+  );
+  document.querySelectorAll('.delete-room').forEach(btn =>
+    btn.addEventListener('click', () => deleteRoom(btn.dataset.id))
+  );
 }
 
 async function openRoomForm(id = '') {
@@ -166,13 +173,14 @@ async function saveRoom(e) {
     hostel_id:       Number(document.getElementById('room-hostel-id').value),
     photo_url:       document.getElementById('room-photo').value.trim()
   };
-  const url    = `${BACKEND_URL}/api/rooms${id ? `/${id}` : ''}`;
-  const method = id ? 'PUT' : 'POST';
-  await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  await fetch(
+    `${BACKEND_URL}/api/rooms${id ? `/${id}` : ''}`,
+    {
+      method:  id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
+    }
+  );
   closeModal('room-form-modal');
   loadRoomsAdmin();
 }
@@ -196,12 +204,14 @@ async function loadStudentsAdmin() {
       <td>${u.username}</td>
       <td>${u.email}</td>
       <td>${u.phone}</td>
-      <td><button class="delete-student" data-id="${u.id}">Delete</button></td>`;
+      <td>
+        <button class="delete-student" data-id="${u.id}">Delete</button>
+      </td>`;
     tbody.appendChild(tr);
   });
-  document.querySelectorAll('.delete-student').forEach(btn => {
-    btn.addEventListener('click', () => deleteStudent(btn.dataset.id));
-  });
+  document.querySelectorAll('.delete-student').forEach(btn =>
+    btn.addEventListener('click', () => deleteStudent(btn.dataset.id))
+  );
 }
 
 async function deleteStudent(id) {
@@ -230,12 +240,12 @@ async function loadApplicationsAdmin() {
       </td>`;
     tbody.appendChild(tr);
   });
-  document.querySelectorAll('.approve-app').forEach(btn => {
-    btn.addEventListener('click', () => updateApplication(btn.dataset.id, 'Accepted'));
-  });
-  document.querySelectorAll('.reject-app').forEach(btn => {
-    btn.addEventListener('click', () => updateApplication(btn.dataset.id, 'Rejected'));
-  });
+  document.querySelectorAll('.approve-app').forEach(btn =>
+    btn.addEventListener('click', () => updateApplication(btn.dataset.id, 'Accepted'))
+  );
+  document.querySelectorAll('.reject-app').forEach(btn =>
+    btn.addEventListener('click', () => updateApplication(btn.dataset.id, 'Rejected'))
+  );
 }
 
 async function updateApplication(id, status) {
@@ -262,12 +272,14 @@ async function loadNotificationsAdmin() {
       <td>${n.message}</td>
       <td>${n.type}</td>
       <td>${n.is_read ? 'Yes' : 'No'}</td>
-      <td><button class="read-notif" data-id="${n.id}">Mark Read</button></td>`;
+      <td>
+        <button class="read-notif" data-id="${n.id}">Mark Read</button>
+      </td>`;
     tbody.appendChild(tr);
   });
-  document.querySelectorAll('.read-notif').forEach(btn => {
-    btn.addEventListener('click', () => markNotifRead(btn.dataset.id));
-  });
+  document.querySelectorAll('.read-notif').forEach(btn =>
+    btn.addEventListener('click', () => markNotifRead(btn.dataset.id))
+  );
 }
 
 async function markNotifRead(id) {
@@ -283,7 +295,7 @@ async function sendNotification(e) {
     message:   document.getElementById('notif-message').value,
     type:      document.getElementById('notif-type').value,
     is_read:   false,
-    created_at:new Date().toISOString()
+    created_at: new Date().toISOString()
   };
   await fetch(`${BACKEND_URL}/api/notifications`, {
     method: 'POST',
@@ -295,8 +307,10 @@ async function sendNotification(e) {
 
 // -- Initialization -------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
+  // Logout link
   document.getElementById('logout-link')?.addEventListener('click', logout);
 
+  // Hostels page
   if (location.pathname.endsWith('admin-hostels.html')) {
     loadHostelsAdmin();
     document.getElementById('create-hostel-button')?.addEventListener('click', () => openHostelForm());
@@ -304,6 +318,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('hostel-form')?.addEventListener('submit', saveHostel);
   }
 
+  // Rooms page
   if (location.pathname.endsWith('admin-rooms.html')) {
     loadRoomsAdmin();
     document.getElementById('create-room-button')?.addEventListener('click', () => openRoomForm());
@@ -311,14 +326,17 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('room-form')?.addEventListener('submit', saveRoom);
   }
 
+  // Students page
   if (location.pathname.endsWith('admin-students.html')) {
     loadStudentsAdmin();
   }
 
+  // Applications page
   if (location.pathname.endsWith('admin-applications.html')) {
     loadApplicationsAdmin();
   }
 
+  // Notifications page
   if (location.pathname.endsWith('admin-notifications.html')) {
     loadNotificationsAdmin();
     document.getElementById('notification-form')?.addEventListener('submit', sendNotification);
