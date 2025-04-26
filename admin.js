@@ -173,9 +173,8 @@ window.addEventListener('DOMContentLoaded', () => {
   // Hostels
   if (location.pathname.endsWith('admin-hostels.html')) {
     loadHostelsAdmin();
-    // Ensure parent element exists before adding event listeners
     const hostelsBody = document.getElementById('hostels-table-body');
-    if (hostelsBody) { // Added check to ensure hostelsBody exists
+    if (hostelsBody) {
       hostelsBody.addEventListener('click', e => {
         if (e.target.matches('.edit-hostel')) openHostelForm(e.target.dataset.id);
         if (e.target.matches('.delete-hostel')) deleteHostel(e.target.dataset.id);
@@ -190,7 +189,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (location.pathname.endsWith('admin-rooms.html')) {
     loadRoomsAdmin();
     const roomsBody = document.getElementById('rooms-table-body');
-    if (roomsBody) { // Added check to ensure roomsBody exists
+    if (roomsBody) {
       roomsBody.addEventListener('click', e => {
         if (e.target.matches('.edit-room')) openRoomForm(e.target.dataset.id);
         if (e.target.matches('.delete-room')) deleteRoom(e.target.dataset.id);
