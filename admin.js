@@ -5,16 +5,12 @@ const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 // -- Modal Helpers ---------------------------------------------------------
 function openModal(id) {
   const modal = document.getElementById(id);
-  if (modal) {
-    modal.style.display = 'flex';
-  }
+  if (modal) modal.style.display = 'flex';
 }
 
 function closeModal(id) {
   const modal = document.getElementById(id);
-  if (modal) {
-    modal.style.display = 'none';
-  }
+  if (modal) modal.style.display = 'none';
 }
 
 // -- Authentication -------------------------------------------------------
@@ -43,12 +39,8 @@ async function loadHostelsAdmin() {
       </td>`;
     tbody.appendChild(tr);
   });
-  document.querySelectorAll('.edit-hostel').forEach(btn => {
-    btn.addEventListener('click', () => openHostelForm(btn.dataset.id));
-  });
-  document.querySelectorAll('.delete-hostel').forEach(btn => {
-    btn.addEventListener('click', () => deleteHostel(btn.dataset.id));
-  });
+  document.querySelectorAll('.edit-hostel').forEach(btn => btn.addEventListener('click', () => openHostelForm(btn.dataset.id)));
+  document.querySelectorAll('.delete-hostel').forEach(btn => btn.addEventListener('click', () => deleteHostel(btn.dataset.id)));
 }
 
 async function openHostelForm(id = '') {
@@ -81,11 +73,7 @@ async function saveHostel(e) {
   };
   const url = id ? `${BACKEND_URL}/api/hostels/${id}` : `${BACKEND_URL}/api/hostels`;
   const method = id ? 'PUT' : 'POST';
-  await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   closeModal('hostel-form-modal');
   loadHostelsAdmin();
 }
@@ -118,12 +106,8 @@ async function loadRoomsAdmin() {
       </td>`;
     tbody.appendChild(tr);
   });
-  document.querySelectorAll('.edit-room').forEach(btn => {
-    btn.addEventListener('click', () => openRoomForm(btn.dataset.id));
-  });
-  document.querySelectorAll('.delete-room').forEach(btn => {
-    btn.addEventListener('click', () => deleteRoom(btn.dataset.id));
-  });
+  document.querySelectorAll('.edit-room').forEach(btn => btn.addEventListener('click', () => openRoomForm(btn.dataset.id)));
+  document.querySelectorAll('.delete-room').forEach(btn => btn.addEventListener('click', () => deleteRoom(btn.dataset.id)));
 }
 
 async function openRoomForm(id = '') {
@@ -162,11 +146,7 @@ async function saveRoom(e) {
   };
   const url = id ? `${BACKEND_URL}/api/rooms/${id}` : `${BACKEND_URL}/api/rooms`;
   const method = id ? 'PUT' : 'POST';
-  await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   closeModal('room-form-modal');
   loadRoomsAdmin();
 }
@@ -227,11 +207,7 @@ async function loadApplicationsAdmin() {
 }
 
 async function updateApplication(id, status) {
-  await fetch(`${BACKEND_URL}/api/applications/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status })
-  });
+  await fetch(`${BACKEND_URL}/api/applications/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
   loadApplicationsAdmin();
 }
 
@@ -263,42 +239,44 @@ async function markNotifRead(id) {
 
 async function sendNotification(e) {
   e.preventDefault();
-  const payload = {
-    user_id:   +document.getElementById('notif-user-id').value,
-    user_role: document.getElementById('notif-user-role').value,
-    message:   document.getElementById('notif-message').value,
-    type:      document.getElementById('notif-type').value,
-    is_read:   false,
-    created_at: new Date().toISOString()
-  };
-  await fetch(`${BACKEND_URL}/api/notifications`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  const payload = { user_id: +document.getElementById('notif-user-id').value, user_role: document.getElementById('notif-user-role').value, message: document.getElementById('notif-message').value, type: document.getElementById('notif-type').value, is_read: false, created_at: new Date().toISOString() };
+  await fetch(`${BACKEND_URL}/api/notifications`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   loadNotificationsAdmin();
 }
 
 // -- Initialization -------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
+  // Logout
   document.getElementById('logout-link')?.addEventListener('click', logout);
 
-  if (location.pathname.includes('admin-hostels.html')) {
+  // Hostels
+  if (location.pathname.endsWith('admin-hostels.html')) {
     loadHostelsAdmin();
     document.getElementById('create-hostel-button')?.addEventListener('click', () => openHostelForm());
     document.getElementById('hostel-form-cancel')?.addEventListener('click', e => { e.preventDefault(); closeModal('hostel-form-modal'); });
+    document.getElementById('hostel-form')?.addEventListener('submit', saveHostel);
   }
 
-  if (location.pathname.includes('admin-rooms.html')) {
+  // Rooms
+  if (location.pathname.endsWith('admin-rooms.html')) {
     loadRoomsAdmin();
     document.getElementById('create-room-button')?.addEventListener('click', () => openRoomForm());
     document.getElementById('room-form-cancel')?.addEventListener('click', e => { e.preventDefault(); closeModal('room-form-modal'); });
+    document.getElementById('room-form')?.addEventListener('submit', saveRoom);
   }
 
-  if (location.pathname.includes('admin-students.html')) loadStudentsAdmin();
-  if (location.pathname.includes('admin-applications.html')) loadApplicationsAdmin();
+  // Students
+  if (location.pathname.endsWith('admin-students.html')) {
+    loadStudentsAdmin();
+  }
 
-  if (location.pathname.includes('admin-notifications.html')) {
+  // Applications
+  if (location.pathname.endsWith('admin-applications.html')) {
+    loadApplicationsAdmin();
+  }
+
+  // Notifications
+  if (location.pathname.endsWith('admin-notifications.html')) {
     loadNotificationsAdmin();
     document.getElementById('notification-form')?.addEventListener('submit', sendNotification);
   }
