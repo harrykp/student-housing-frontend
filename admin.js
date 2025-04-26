@@ -2,24 +2,20 @@
 
 const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
-// ————————————————————————————————————————————————————————————————————————————
-// Modal Helpers
-// — Show/hide a modal dialog by toggling the "active" class
+// — Modal Helpers
 function openModal(id)  { document.getElementById(id)?.classList.add('active'); }
 function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
 
-// ————————————————————————————————————————————————————————————————————————————
-// Authentication
+// — Auth
 function logout() {
   localStorage.clear();
   window.location.href = 'index.html';
 }
 
-// ————————————————————————————————————————————————————————————————————————————
-// HOSTELS CRUD
+// — HOSTELS CRUD
 async function loadHostelsAdmin() {
   const tbody = document.getElementById('hostels-table-body');
-  tbody.innerHTML = '<tr><td colspan="7">Loading hostels…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="8">Loading hostels…</td></tr>';
   try {
     const [hRes, rRes] = await Promise.all([
       fetch(`${BACKEND_URL}/api/hostels`),
@@ -29,22 +25,22 @@ async function loadHostelsAdmin() {
     if (!rRes.ok) throw new Error(`Rooms API ${rRes.status}`);
     const hostels = await hRes.json();
     const rooms   = await rRes.json();
-
     if (!Array.isArray(hostels) || !Array.isArray(rooms)) {
       throw new Error('Expected arrays');
     }
 
     tbody.innerHTML = '';
     if (hostels.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7">No hostels found.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8">No hostels found.</td></tr>';
       return;
     }
 
     hostels.forEach(h => {
-      const linked = rooms
+      const linkedRooms = rooms
         .filter(r => r.hostel_id === h.id)
         .map(r => r.name)
         .join(', ') || '—';
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${h.id}</td>
@@ -52,22 +48,22 @@ async function loadHostelsAdmin() {
         <td>${h.address || ''}</td>
         <td>${h.description}</td>
         <td>${h.occupancy_limit}</td>
-        <td>${linked}</td>
+        <td>${linkedRooms}</td>
         <td><a href="${h.photo_url}" target="_blank">View</a></td>
         <td>
           <button class="edit-hostel"   data-id="${h.id}">Edit</button>
           <button class="delete-hostel" data-id="${h.id}">Delete</button>
-        </td>`;
+        </td>
+      `;
       tbody.appendChild(tr);
     });
   } catch (err) {
     console.error('Error loading hostels:', err);
-    tbody.innerHTML = `<tr><td colspan="7">Error loading hostels.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8">Error loading hostels.</td></tr>`;
   }
 }
 
 async function openHostelForm(id = '') {
-  // clear all fields
   ['hostel-id','hostel-name','hostel-address','hostel-description','hostel-occupancy','hostel-photo']
     .forEach(fid => document.getElementById(fid).value = '');
 
@@ -85,8 +81,8 @@ async function openHostelForm(id = '') {
   openModal('hostel-form-modal');
 }
 
-async function saveHostel(event) {
-  event.preventDefault();
+async function saveHostel(e) {
+  e.preventDefault();
   const id = document.getElementById('hostel-id').value;
   const payload = {
     name:            document.getElementById('hostel-name').value.trim(),
@@ -95,13 +91,14 @@ async function saveHostel(event) {
     occupancy_limit: Number(document.getElementById('hostel-occupancy').value),
     photo_url:       document.getElementById('hostel-photo').value.trim()
   };
-  const url    = `${BACKEND_URL}/api/hostels${id ? `/${id}` : ''}`;
-  const method = id ? 'PUT' : 'POST';
-  await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  await fetch(
+    `${BACKEND_URL}/api/hostels${id ? `/${id}` : ''}`,
+    {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }
+  );
   closeModal('hostel-form-modal');
   loadHostelsAdmin();
 }
@@ -113,8 +110,7 @@ async function deleteHostel(id) {
 }
 
 
-// ————————————————————————————————————————————————————————————————————————————
-// ROOMS CRUD
+// — ROOMS CRUD
 async function loadRoomsAdmin() {
   const tbody = document.getElementById('rooms-table-body');
   tbody.innerHTML = '<tr><td colspan="8">Loading rooms…</td></tr>';
@@ -127,7 +123,6 @@ async function loadRoomsAdmin() {
     if (!hRes.ok) throw new Error(`Hostels API ${hRes.status}`);
     const rooms   = await rRes.json();
     const hostels = await hRes.json();
-
     if (!Array.isArray(rooms) || !Array.isArray(hostels)) {
       throw new Error('Expected arrays');
     }
@@ -152,7 +147,8 @@ async function loadRoomsAdmin() {
         <td>
           <button class="edit-room"   data-id="${r.id}">Edit</button>
           <button class="delete-room" data-id="${r.id}">Delete</button>
-        </td>`;
+        </td>
+      `;
       tbody.appendChild(tr);
     });
   } catch (err) {
@@ -180,8 +176,8 @@ async function openRoomForm(id = '') {
   openModal('room-form-modal');
 }
 
-async function saveRoom(event) {
-  event.preventDefault();
+async function saveRoom(e) {
+  e.preventDefault();
   const id = document.getElementById('room-id').value;
   const payload = {
     name:            document.getElementById('room-name').value.trim(),
@@ -191,13 +187,14 @@ async function saveRoom(event) {
     hostel_id:       Number(document.getElementById('room-hostel-id').value),
     photo_url:       document.getElementById('room-photo').value.trim()
   };
-  const url    = `${BACKEND_URL}/api/rooms${id ? `/${id}` : ''}`;
-  const method = id ? 'PUT' : 'POST';
-  await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  await fetch(
+    `${BACKEND_URL}/api/rooms${id ? `/${id}` : ''}`,
+    {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }
+  );
   closeModal('room-form-modal');
   loadRoomsAdmin();
 }
@@ -209,8 +206,7 @@ async function deleteRoom(id) {
 }
 
 
-// ————————————————————————————————————————————————————————————————————————————
-// STUDENTS CRUD
+// — STUDENTS CRUD
 async function loadStudentsAdmin() {
   const tbody = document.getElementById('students-table-body');
   tbody.innerHTML = '<tr><td colspan="5">Loading students…</td></tr>';
@@ -235,7 +231,8 @@ async function loadStudentsAdmin() {
         <td>${u.phone || ''}</td>
         <td>
           <button class="delete-student" data-id="${u.id}">Delete</button>
-        </td>`;
+        </td>
+      `;
       tbody.appendChild(tr);
     });
   } catch (err) {
@@ -251,8 +248,7 @@ async function deleteStudent(id) {
 }
 
 
-// ————————————————————————————————————————————————————————————————————————————
-// APPLICATIONS CRUD (Approve/Reject)
+// — APPLICATIONS CRUD
 async function loadApplicationsAdmin() {
   const tbody = document.getElementById('applications-table-body');
   tbody.innerHTML = '<tr><td colspan="6">Loading applications…</td></tr>';
@@ -278,8 +274,9 @@ async function loadApplicationsAdmin() {
         <td>${new Date(a.applied_at).toLocaleString()}</td>
         <td>
           <button class="approve-app" data-id="${a.id}">Approve</button>
-          <button class="reject-app" data-id="${a.id}">Reject</button>
-        </td>`;
+          <button class="reject-app"  data-id="${a.id}">Reject</button>
+        </td>
+      `;
       tbody.appendChild(tr);
     });
   } catch (err) {
@@ -291,15 +288,14 @@ async function loadApplicationsAdmin() {
 async function updateApplication(id, status) {
   await fetch(`${BACKEND_URL}/api/applications/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type':'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status })
   });
   loadApplicationsAdmin();
 }
 
 
-// ————————————————————————————————————————————————————————————————————————————
-// NOTIFICATIONS CRUD
+// — NOTIFICATIONS CRUD
 async function loadNotificationsAdmin() {
   const tbody = document.getElementById('notifications-table-body');
   tbody.innerHTML = '<tr><td colspan="7">Loading notifications…</td></tr>';
@@ -324,7 +320,8 @@ async function loadNotificationsAdmin() {
         <td>${n.message}</td>
         <td>${n.type}</td>
         <td>${n.is_read ? 'Yes' : 'No'}</td>
-        <td><button class="read-notif" data-id="${n.id}">Mark Read</button></td>`;
+        <td><button class="read-notif" data-id="${n.id}">Mark Read</button></td>
+      `;
       tbody.appendChild(tr);
     });
   } catch (err) {
@@ -338,76 +335,85 @@ async function markNotifRead(id) {
   loadNotificationsAdmin();
 }
 
-async function sendNotification(event) {
-  event.preventDefault();
+async function sendNotification(e) {
+  e.preventDefault();
   const payload = {
-    user_id:   +document.getElementById('notif-user-id').value,
-    user_role: document.getElementById('notif-user-role').value,
-    message:   document.getElementById('notif-message').value,
-    type:      document.getElementById('notif-type').value,
-    is_read:   false,
+    user_id:    +document.getElementById('notif-user-id').value,
+    user_role:  document.getElementById('notif-user-role').value,
+    message:    document.getElementById('notif-message').value,
+    type:       document.getElementById('notif-type').value,
+    is_read:    false,
     created_at: new Date().toISOString()
   };
   await fetch(`${BACKEND_URL}/api/notifications`, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
   loadNotificationsAdmin();
 }
 
 
-// ————————————————————————————————————————————————————————————————————————————
-// INITIALIZE & DELEGATE
+// — INITIALIZE & DELEGATE
 window.addEventListener('DOMContentLoaded', () => {
-  // common logout link
+  // common
   document.getElementById('logout-link')?.addEventListener('click', logout);
 
-  // Hostels page
+  // hostels page
   if (location.pathname.endsWith('admin-hostels.html')) {
     loadHostelsAdmin();
-    document.getElementById('create-hostel-button')?.addEventListener('click', () => openHostelForm());
-    document.getElementById('hostels-table-body')?.addEventListener('click', e => {
-      if (e.target.matches('.edit-hostel'))   openHostelForm(e.target.dataset.id);
-      if (e.target.matches('.delete-hostel')) deleteHostel(e.target.dataset.id);
-    });
-    document.getElementById('hostel-form')?.addEventListener('submit', saveHostel);
+    document.getElementById('create-hostel-button')
+      ?.addEventListener('click', () => openHostelForm());
+    document.getElementById('hostels-table-body')
+      ?.addEventListener('click', e => {
+        if (e.target.matches('.edit-hostel'))   openHostelForm(e.target.dataset.id);
+        if (e.target.matches('.delete-hostel')) deleteHostel(e.target.dataset.id);
+      });
+    document.getElementById('hostel-form')
+      ?.addEventListener('submit', saveHostel);
   }
 
-  // Rooms page
+  // rooms page
   if (location.pathname.endsWith('admin-rooms.html')) {
     loadRoomsAdmin();
-    document.getElementById('create-room-button')?.addEventListener('click', () => openRoomForm());
-    document.getElementById('rooms-table-body')?.addEventListener('click', e => {
-      if (e.target.matches('.edit-room'))   openRoomForm(e.target.dataset.id);
-      if (e.target.matches('.delete-room')) deleteRoom(e.target.dataset.id);
-    });
-    document.getElementById('room-form')?.addEventListener('submit', saveRoom);
+    document.getElementById('create-room-button')
+      ?.addEventListener('click', () => openRoomForm());
+    document.getElementById('rooms-table-body')
+      ?.addEventListener('click', e => {
+        if (e.target.matches('.edit-room'))   openRoomForm(e.target.dataset.id);
+        if (e.target.matches('.delete-room')) deleteRoom(e.target.dataset.id);
+      });
+    document.getElementById('room-form')
+      ?.addEventListener('submit', saveRoom);
   }
 
-  // Students page
+  // students page
   if (location.pathname.endsWith('admin-students.html')) {
     loadStudentsAdmin();
-    document.getElementById('students-table-body')?.addEventListener('click', e => {
-      if (e.target.matches('.delete-student')) deleteStudent(e.target.dataset.id);
-    });
+    document.getElementById('students-table-body')
+      ?.addEventListener('click', e => {
+        if (e.target.matches('.delete-student')) deleteStudent(e.target.dataset.id);
+      });
   }
 
-  // Applications page
+  // applications page
   if (location.pathname.endsWith('admin-applications.html')) {
     loadApplicationsAdmin();
-    document.getElementById('applications-table-body')?.addEventListener('click', e => {
-      if (e.target.matches('.approve-app')) updateApplication(e.target.dataset.id, 'Accepted');
-      if (e.target.matches('.reject-app'))  updateApplication(e.target.dataset.id, 'Rejected');
-    });
+    document.getElementById('applications-table-body')
+      ?.addEventListener('click', e => {
+        if (e.target.matches('.approve-app')) updateApplication(e.target.dataset.id, 'Accepted');
+        if (e.target.matches('.reject-app'))  updateApplication(e.target.dataset.id, 'Rejected');
+      });
   }
 
-  // Notifications page
+  // notifications page
   if (location.pathname.endsWith('admin-notifications.html')) {
     loadNotificationsAdmin();
-    document.getElementById('notification-form')?.addEventListener('submit', sendNotification);
-    document.getElementById('notifications-table-body')?.addEventListener('click', e => {
-      if (e.target.matches('.read-notif')) markNotifRead(e.target.dataset.id);
-    });
+    document.getElementById('notification-form')
+      ?.addEventListener('submit', sendNotification);
+    document.getElementById('notifications-table-body')
+      ?.addEventListener('click', e => {
+        if (e.target.matches('.read-notif')) markNotifRead(e.target.dataset.id);
+      });
   }
 });
