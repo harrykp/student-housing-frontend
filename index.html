@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Student Housing</title>
   <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* Search row: fields side by side */
+    #search-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+      margin-bottom: 2rem;
+    }
+    #search-form label {
+      display: flex;
+      flex-direction: column;
+    }
+    #search-form button {
+      height: 2.5rem;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -21,7 +38,7 @@
   <main>
     <!-- Search Form -->
     <section id="search-section">
-      <form id="search-form" class="form">
+      <form id="search-form">
         <label>
           Type
           <select id="search-type">
@@ -43,10 +60,10 @@
           <input type="number" id="search-max-price" placeholder="Any"/>
         </label>
         <label>
-          Amenities (comma-separated)
+          Amenities
           <input type="text" id="search-amenities" placeholder="WiFi,Pool,..."/>
         </label>
-        <button type="submit" id="search-button">Search</button>
+        <button type="submit">Search</button>
         <button type="button" id="clear-search-button">Clear</button>
       </form>
     </section>
@@ -54,17 +71,13 @@
     <!-- Hostels Section -->
     <section id="hostels-section">
       <h2>Available Hostels</h2>
-      <ul id="hostels-list">
-        <!-- populated by app.js → renderHostels() -->
-      </ul>
+      <ul id="hostels-list"></ul>
     </section>
 
     <!-- Rooms Section -->
     <section id="rooms-section">
       <h2>Available Rooms</h2>
-      <ul id="rooms-list">
-        <!-- populated by app.js → renderRooms() -->
-      </ul>
+      <ul id="rooms-list" class="rooms-grid"></ul>
     </section>
   </main>
 
