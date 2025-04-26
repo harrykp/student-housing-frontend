@@ -114,20 +114,24 @@ async function login(event) {
   event.preventDefault();
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
+
   if (!email || !password) {
-    alert('Please fill in both fields.');
+    alert('Both email and password are required.');
     return;
   }
+
   try {
     const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
+
     if (!res.ok) {
       const errData = await res.json();
-      throw new Error(errData.message || 'Login failed');
+      throw new Error(errData.error || errData.message || 'Login failed');
     }
+
     const { token } = await res.json();
     localStorage.setItem('token', token);
     alert('Login successful!');
@@ -140,24 +144,33 @@ async function login(event) {
 
 async function register(event) {
   event.preventDefault();
-  const username = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const password = document.getElementById('password').value.trim();
+  const username        = document.getElementById('name').value.trim();
+  const email           = document.getElementById('email').value.trim();
+  const phone           = document.getElementById('phone').value.trim();
+  const password        = document.getElementById('password').value.trim();
+  const confirmPassword = document.getElementById('confirm-password')?.value.trim();
+
   if (!username || !email || !phone || !password) {
     alert('All fields are required.');
     return;
   }
+  if (confirmPassword !== undefined && password !== confirmPassword) {
+    alert('Passwords do not match.');
+    return;
+  }
+
   try {
     const res = await fetch(`${BACKEND_URL}/api/users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, phone, password })
     });
+
     if (!res.ok) {
       const errData = await res.json();
-      throw new Error(errData.message || 'Registration failed');
+      throw new Error(errData.error || errData.message || 'Registration failed');
     }
+
     alert('Registration successful!');
     window.location.href = 'login.html';
   } catch (err) {
