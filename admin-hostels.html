@@ -18,13 +18,21 @@
       <a href="#" id="logout-link">Logout</a>
     </nav>
   </header>
+
   <main>
     <button id="create-hostel-button">+ New Hostel</button>
+
     <table>
       <thead>
         <tr>
-          <th>ID</th><th>Name</th><th>Description</th>
-          <th>Occupancy</th><th>Rooms</th><th>Photo</th><th>Actions</th>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Address</th>
+          <th>Description</th>
+          <th>Occupancy</th>
+          <th>Rooms</th>
+          <th>Photo</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="hostels-table-body"></tbody>
@@ -35,9 +43,10 @@
       <form id="hostel-form" class="modal-form">
         <input type="hidden" id="hostel-id"/>
         <label>Name: <input type="text" id="hostel-name" required/></label>
+        <label>Address: <input type="text" id="hostel-address" required/></label>
         <label>Description: <textarea id="hostel-description" required></textarea></label>
-        <label>Occupancy: <input type="number" id="hostel-occupancy" required/></label>
-        <label>Photo URL: <input type="url" id="hostel-photo" required/></label>
+        <label>Occupancy Limit: <input type="number" id="hostel-occupancy" required/></label>
+        <label>Photo URL: <input type="url" id="hostel-photo"/></label>
         <div class="modal-actions">
           <button type="submit">Save</button>
           <button type="button" onclick="closeModal('hostel-form-modal')">Cancel</button>
@@ -45,7 +54,11 @@
       </form>
     </div>
   </main>
-  <footer><p>© 2025 Student Housing System</p></footer>
+
+  <footer>
+    <p>© 2025 Student Housing System</p>
+  </footer>
+
   <script src="admin.js" defer></script>
 </body>
 </html>
