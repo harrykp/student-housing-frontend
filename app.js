@@ -1,137 +1,26 @@
-// app.js (entry point for your frontend)
+// app.js
 
-// Backend Base URL
 const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
-// Utility to set text content safely
-function setTextContent(id, text) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = text;
-}
-
-/**
- * Fetch and display the list of hostels
- */
-async function loadHostels() {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/hostels`);
-    if (!res.ok) throw new Error(`Hostels fetch error: ${res.status}`);
-    const hostels = await res.json();
-    const list = document.getElementById('hostels-list');
-    if (!list) return;
-    list.innerHTML = '';
-    hostels.forEach(({ name, address }) => {
-      const li = document.createElement('li');
-      li.textContent = `${name} - ${address}`;
-      list.appendChild(li);
-    });
-  } catch (err) {
-    console.error('Error loading hostels:', err.message);
-  }
-}
-
-/**
- * Fetch and display dashboard data (requires valid JWT)
- */
-async function loadDashboard() {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.warn('No auth token, skipping dashboard fetch');
-    return;
-  }
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/dashboard`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error(`Dashboard fetch error: ${res.status}`);
-    const data = await res.json();
-    if (data.error) {
-      console.error('API error:', data.error);
-      return;
-    }
-    populateProfile(data.profile || {});
-    populateStats(data.stats || {});
-    populateHostels(data.hostels || []);
-    populateRecentActivities(data.activities || []);
-  } catch (err) {
-    console.error('Error loading dashboard:', err.message);
-    alert('Failed to load dashboard.');
-  }
-}
-
-function populateProfile({ username, email }) {
-  setTextContent('student-name', username || 'N/A');
-  setTextContent('student-email', email || 'N/A');
-}
-
-function populateStats({ total, pending, accepted, rejected }) {
-  setTextContent('total-applications', total ?? 0);
-  setTextContent('pending-applications', pending ?? 0);
-  setTextContent('accepted-applications', accepted ?? 0);
-  setTextContent('rejected-applications', rejected ?? 0);
-}
-
-function populateHostels(hostels) {
-  const container = document.getElementById('hostels-list');
-  if (!container) return;
-  container.innerHTML = '';
-  hostels.forEach(({ name, address }) => {
-    const div = document.createElement('div');
-    div.className = 'hostel-card';
-    div.innerHTML = `<h3>${name}</h3><p>${address}</p>`;
-    container.appendChild(div);
-  });
-}
-
-function populateRecentActivities(activities) {
-  const list = document.getElementById('recent-activities-list');
-  if (!list) return;
-  list.innerHTML = '';
-  activities.forEach(activity => {
-    const li = document.createElement('li');
-    li.textContent = activity;
-    list.appendChild(li);
-  });
-}
-
-async function submitApplication(userId, roomId) {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/applications`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, room_id: roomId, status: 'Pending' })
-    });
-    if (!res.ok) throw new Error(`Submit error: ${res.status}`);
-    alert('Application submitted!');
-  } catch (err) {
-    console.error('Error submitting application:', err.message);
-    alert('Failed to submit application.');
-  }
-}
-
-// **User Authentication Handlers**
+// ——— Auth Handlers ———————————————————————————————————————————————————
 async function login(event) {
   event.preventDefault();
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
-
   if (!email || !password) {
-    alert('Both email and password are required.');
+    alert('Please fill in both fields.');
     return;
   }
-
   try {
     const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-
     if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || errData.message || 'Login failed');
+      const err = await res.json();
+      throw new Error(err.error || 'Login failed');
     }
-
     const { token } = await res.json();
     localStorage.setItem('token', token);
     alert('Login successful!');
@@ -144,33 +33,24 @@ async function login(event) {
 
 async function register(event) {
   event.preventDefault();
-  const username        = document.getElementById('name').value.trim();
-  const email           = document.getElementById('email').value.trim();
-  const phone           = document.getElementById('phone').value.trim();
-  const password        = document.getElementById('password').value.trim();
-  const confirmPassword = document.getElementById('confirm-password')?.value.trim();
-
+  const username = document.getElementById('name').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const phone    = document.getElementById('phone').value.trim();
+  const password = document.getElementById('password').value.trim();
   if (!username || !email || !phone || !password) {
     alert('All fields are required.');
     return;
   }
-  if (confirmPassword !== undefined && password !== confirmPassword) {
-    alert('Passwords do not match.');
-    return;
-  }
-
   try {
     const res = await fetch(`${BACKEND_URL}/api/users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, phone, password })
     });
-
     if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || errData.message || 'Registration failed');
+      const err = await res.json();
+      throw new Error(err.error || 'Registration failed');
     }
-
     alert('Registration successful!');
     window.location.href = 'login.html';
   } catch (err) {
@@ -179,22 +59,144 @@ async function register(event) {
   }
 }
 
-// DOM-ready: attach all form and button handlers
+// ——— Fetch Helpers —————————————————————————————————————————————————
+async function fetchHostels() {
+  const res = await fetch(`${BACKEND_URL}/api/hostels`);
+  if (!res.ok) throw new Error(`Hostels status ${res.status}`);
+  return res.json();
+}
+
+async function fetchRooms() {
+  const res = await fetch(`${BACKEND_URL}/api/rooms`);
+  if (!res.ok) throw new Error(`Rooms status ${res.status}`);
+  return res.json();
+}
+
+// ——— Render Functions ——————————————————————————————————————————————
+function renderHostels(hostels) {
+  const ul = document.getElementById('hostels-list');
+  ul.innerHTML = '';
+  hostels.forEach(h => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <h3>${h.name}</h3>
+      <p>${h.address || h.description}</p>
+    `;
+    ul.appendChild(li);
+  });
+}
+
+function renderRooms(rooms) {
+  const ul = document.getElementById('rooms-list');
+  ul.innerHTML = '';
+  rooms.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'room-card';
+    div.innerHTML = `
+      <img src="${r.photo_url}" alt="${r.name}">
+      <h3>${r.name}</h3>
+      <p>Price: ${r.price} / mo</p>
+      <p>Occupancy limit: ${r.occupancy_limit}</p>
+      <p>Hostel: ${r.hostel_name || r.hostel_id}</p>
+    `;
+    ul.appendChild(div);
+  });
+}
+
+// ——— Initial Loads —————————————————————————————————————————————————
+async function loadHostelsSection() {
+  try {
+    const hostels = await fetchHostels();
+    renderHostels(hostels);
+  } catch (err) {
+    console.error(err);
+    alert('Failed to load hostels.');
+  }
+}
+
+async function loadRoomsSection() {
+  try {
+    // fetch hostels so we can annotate room cards with hostel_name
+    const [rooms, hostels] = await Promise.all([ fetchRooms(), fetchHostels() ]);
+    const enriched = rooms.map(r => {
+      const h = hostels.find(h=>h.id===r.hostel_id);
+      return { ...r, hostel_name: h?.name || '—' };
+    });
+    renderRooms(enriched);
+  } catch (err) {
+    console.error(err);
+    alert('Failed to load rooms.');
+  }
+}
+
+// ——— Search ———————————————————————————————————————————————————————
+async function performSearch(event) {
+  event.preventDefault();
+  const type      = document.getElementById('search-type').value;
+  const location  = document.getElementById('search-location').value.trim().toLowerCase();
+  const minPrice  = Number(document.getElementById('search-min-price').value);
+  const maxPrice  = Number(document.getElementById('search-max-price').value);
+  const amenities = document.getElementById('search-amenities').value
+                     .split(',').map(a=>a.trim().toLowerCase()).filter(a=>a);
+
+  if (type === 'hostel' || type === 'all') {
+    let hostels = await fetchHostels();
+    hostels = hostels.filter(h => {
+      if (location && !h.address?.toLowerCase().includes(location) && !h.name.toLowerCase().includes(location)) return false;
+      return true;
+    });
+    renderHostels(hostels);
+  }
+  if (type === 'room' || type === 'all') {
+    let rooms = await fetchRooms();
+    // annotate with hostel_name for filtering by location
+    const hostels = await fetchHostels();
+    rooms = rooms.map(r=>({
+      ...r,
+      hostel_name: (hostels.find(h=>h.id===r.hostel_id)?.name||'')
+    }));
+    rooms = rooms.filter(r => {
+      if (location && !(
+            r.hostel_name.toLowerCase().includes(location) ||
+            r.description.toLowerCase().includes(location) ||
+            r.name.toLowerCase().includes(location)
+          )) return false;
+      if (!isNaN(minPrice) && r.price < minPrice) return false;
+      if (!isNaN(maxPrice) && r.price > maxPrice) return false;
+      if (amenities.length) {
+        const ams = r.amenities || [];
+        if (!amenities.every(a=>ams.map(x=>x.toLowerCase()).includes(a))) return false;
+      }
+      return true;
+    });
+    renderRooms(rooms);
+  }
+}
+
+function clearSearch(event) {
+  event.preventDefault();
+  document.getElementById('search-form').reset();
+  loadHostelsSection();
+  loadRoomsSection();
+}
+
+// ——— DOM Ready —————————————————————————————————————————————————————
 window.addEventListener('DOMContentLoaded', () => {
-  loadHostels();
-  if (localStorage.getItem('token')) {
+  const path = location.pathname;
+  if (path.endsWith('index.html') || path === '/' || path.endsWith('/index.html')) {
+    loadHostelsSection();
+    loadRoomsSection();
+    // search wiring
+    document.getElementById('search-form')?.addEventListener('submit', performSearch);
+    document.getElementById('clear-search-button')?.addEventListener('click', clearSearch);
+  }
+  if (path.endsWith('rooms.html')) {
+    loadRoomsSection();
+  }
+  if (path.endsWith('dashboard.html')) {
     loadDashboard();
   }
+  // auth forms
   document.getElementById('login-form')?.addEventListener('submit', login);
   document.getElementById('register-form')?.addEventListener('submit', register);
-  document.getElementById('apply-button')?.addEventListener('click', () => {
-    const userId = Number(localStorage.getItem('userId'));
-    const roomId = Number(document.getElementById('room-id')?.value);
-    submitApplication(userId, roomId);
-  });
-  document.getElementById('search-button')?.addEventListener('click', async () => {
-    const query = document.getElementById('search-input')?.value.trim();
-    if (!query) return;
-    // implement search logic here
-  });
 });
