@@ -1,197 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Applications</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        header, footer {
-            text-align: center;
-            padding: 1rem;
-            background: #2e86de;
-            color: white;
-        }
-        header h1, footer p {
-            margin: 0;
-        }
-        .navbar {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 0;
-            padding: 0;
-            list-style: none;
-            background: #1e6ab9;
-        }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            transition: background 0.3s ease;
-        }
-        .navbar a:hover {
-            background: #155a9c;
-        }
-        main {
-            padding: 2rem;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 2rem;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 1rem;
-            text-align: left;
-        }
-        th {
-            background: #f4f4f4;
-        }
-        button {
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            color: white;
-            background: #dc3545;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        button:hover {
-            background: #c82333;
-        }
-        .filter {
-            margin-bottom: 1rem;
-        }
-        .filter select {
-            padding: 0.5rem;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>My Applications | Student Housing</title>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-    <header>
-        <h1>My Applications</h1>
-        <nav>
-            <ul class="navbar">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="dashboard.html">Dashboard</a></li>
-            </ul>
-        </nav>
-    </header>
+  <header>
+    <h1>My Applications</h1>
+    <nav class="navbar">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="hostels.html">Hostels</a>
+      <a href="rooms.html">Rooms</a>
+      <a href="applications.html" class="active">My Applications</a>
+    </nav>
+  </header>
 
-    <main>
-        <!-- Filter Section -->
-        <div class="filter">
-            <label for="status-filter">Filter by Status:</label>
-            <select id="status-filter">
-                <option value="">All</option>
-                <option value="Pending">Pending</option>
-                <option value="Accepted">Accepted</option>
-                <option value="Rejected">Rejected</option>
-            </select>
-        </div>
+  <main>
+    <ul id="applications-list">
+      <!-- app.js → loadDashboard → render applications:
+         <li>
+           Hostel: X, Room: Y, Status: Pending
+         </li>
+      -->
+    </ul>
+  </main>
 
-        <!-- Applications Table -->
-        <table>
-            <thead>
-                <tr>
-                    <th>Room</th>
-                    <th>Status</th>
-                    <th>Applied At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="applications-table">
-                <!-- Applications will be dynamically loaded here -->
-            </tbody>
-        </table>
-    </main>
+  <footer>
+    <p>© 2025 Student Housing System</p>
+  </footer>
 
-    <footer>
-        <p>© 2025 Student Housing System</p>
-    </footer>
-
-    <script src="app.js" defer></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            loadApplications();
-
-            document.getElementById('status-filter').addEventListener('change', (event) => {
-                const filterValue = event.target.value;
-                loadApplications(filterValue);
-            });
-        });
-
-        async function loadApplications(statusFilter = '') {
-            const applicationsTable = document.getElementById('applications-table');
-            applicationsTable.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
-            
-            try {
-                const response = await fetch('/api/applications');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch applications');
-                }
-
-                const applications = await response.json();
-                applicationsTable.innerHTML = '';
-
-                const filteredApplications = statusFilter
-                    ? applications.filter(app => app.status === statusFilter)
-                    : applications;
-
-                if (filteredApplications.length === 0) {
-                    applicationsTable.innerHTML = '<tr><td colspan="4">No applications found</td></tr>';
-                    return;
-                }
-
-                filteredApplications.forEach((app) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${app.room}</td>
-                        <td>${app.status}</td>
-                        <td>${app.applied_at}</td>
-                        <td><button onclick="withdrawApplication(${app.id})">Withdraw</button></td>
-                    `;
-                    applicationsTable.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Error loading applications:', error);
-                applicationsTable.innerHTML = '<tr><td colspan="4">Error loading applications</td></tr>';
-            }
-        }
-
-        async function withdrawApplication(applicationId) {
-            const confirmation = confirm('Are you sure you want to withdraw this application?');
-            if (!confirmation) return;
-
-            try {
-                const response = await fetch(`/api/applications/${applicationId}`, {
-                    method: 'DELETE',
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to withdraw application');
-                }
-
-                alert('Application withdrawn successfully');
-                loadApplications(); // Reload applications after withdrawal
-            } catch (error) {
-                console.error('Error withdrawing application:', error);
-                alert('Failed to withdraw application');
-            }
-        }
-    </script>
+  <script src="app.js" defer></script>
 </body>
 </html>
