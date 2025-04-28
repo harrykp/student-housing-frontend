@@ -1,7 +1,7 @@
 // admin.js
 
 // ─── Point at Your Render Backend Here ───────────────────────────────────────
-const BACKEND_URL = 'https://student-hostel-backend-bd96.onrender.com';
+const BACKEND_URL = 'https://student-housing-backend.onrender.com';
 
 /** ── Admin Auth Link ──────────────────────────────────────────────────────── */
 function setupAdminAuthLink() {
