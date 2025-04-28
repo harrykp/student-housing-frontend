@@ -1,79 +1,114 @@
 // admin.js
 
-const BACKEND_URL = 'https://student-housing-backend.onrender.com';
+// ─── Point at Your Render Backend Here ───────────────────────────────────────
+const BACKEND_URL = 'https://student-hostel-backend-bd96.onrender.com';
 
-// — Modal Helpers
-function openModal(id)  { document.getElementById(id)?.classList.add('active'); }
-function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
-
-// — Auth
-function logout() {
-  localStorage.clear();
-  window.location.href = 'index.html';
-}
-
-// — HOSTELS CRUD
-async function loadHostelsAdmin() {
-  const tbody = document.getElementById('hostels-table-body');
-  tbody.innerHTML = '<tr><td colspan="8">Loading hostels…</td></tr>';
-  try {
-    const [hRes, rRes] = await Promise.all([
-      fetch(`${BACKEND_URL}/api/hostels`),
-      fetch(`${BACKEND_URL}/api/rooms`)
-    ]);
-    if (!hRes.ok) throw new Error(`Hostels API ${hRes.status}`);
-    if (!rRes.ok) throw new Error(`Rooms API ${rRes.status}`);
-    const hostels = await hRes.json();
-    const rooms   = await rRes.json();
-    if (!Array.isArray(hostels) || !Array.isArray(rooms)) {
-      throw new Error('Expected arrays');
-    }
-
-    tbody.innerHTML = '';
-    if (hostels.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8">No hostels found.</td></tr>';
-      return;
-    }
-
-    hostels.forEach(h => {
-      const linkedRooms = rooms
-        .filter(r => r.hostel_id === h.id)
-        .map(r => r.name)
-        .join(', ') || '—';
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${h.id}</td>
-        <td>${h.name}</td>
-        <td>${h.address || ''}</td>
-        <td>${h.description}</td>
-        <td>${h.occupancy_limit}</td>
-        <td>${linkedRooms}</td>
-        <td><a href="${h.photo_url}" target="_blank">View</a></td>
-        <td>
-          <button class="edit-hostel"   data-id="${h.id}">Edit</button>
-          <button class="delete-hostel" data-id="${h.id}">Delete</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    console.error('Error loading hostels:', err);
-    tbody.innerHTML = `<tr><td colspan="8">Error loading hostels.</td></tr>`;
+/** ── Admin Auth Link ──────────────────────────────────────────────────────── */
+function setupAdminAuthLink() {
+  const link = document.getElementById('admin-auth-link');
+  if (!link) return console.error('No #admin-auth-link');
+  const token = localStorage.getItem('adminToken');
+  if (token) {
+    link.textContent = 'Logout';
+    link.href = '#';
+    link.onclick = e => {
+      e.preventDefault();
+      localStorage.removeItem('adminToken');
+      window.location.href = 'admin-login.html';
+    };
+  } else {
+    link.textContent = 'Login';
+    link.href = 'admin-login.html';
+    link.onclick = null;
   }
 }
 
-async function openHostelForm(id = '') {
-  ['hostel-id','hostel-name','hostel-address','hostel-description','hostel-occupancy','hostel-photo']
-    .forEach(fid => document.getElementById(fid).value = '');
+/** ── Fetch Wrapper ─────────────────────────────────────────────────────────── */
+async function fetchWithErrorHandling(url, opts = {}) {
+  const token = localStorage.getItem('adminToken');
+  opts.headers = {
+    ...(opts.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(opts.body ? { 'Content-Type': 'application/json' } : {})
+  };
+  try {
+    const res = await fetch(url, opts);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error(`Fetch ${url} failed:`, err);
+    alert('Failed to load or save data. Check your network or login status.');
+    return null;
+  }
+}
 
+/** ── Modal Helpers ─────────────────────────────────────────────────────────── */
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return console.error(`Modal "${id}" not found`);
+  // show
+  modal.style.display = 'flex';
+  // outside‐click to close (only once)
+  if (!modal.hasAttribute('data-modal-listener')) {
+    modal.addEventListener('click', e => {
+      if (e.target === modal) closeModal(id);
+    });
+    modal.setAttribute('data-modal-listener', 'true');
+  }
+}
+
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return console.error(`Modal "${id}" not found`);
+  modal.style.display = 'none';
+}
+
+// ESC key closes any open modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal').forEach(m => {
+      if (m.style.display === 'flex') m.style.display = 'none';
+    });
+  }
+});
+
+// ─── HOSTELS ──────────────────────────────────────────────────────────────────
+async function loadHostelsAdmin() {
+  const hostels = await fetchWithErrorHandling(`${BACKEND_URL}/api/hostels`);
+  if (!hostels) return;
+  const tbody = document.getElementById('hostels-table-body');
+  if (!tbody) return console.error('No #hostels-table-body');
+  tbody.innerHTML = '';
+  hostels.forEach(h => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${h.id}</td>
+      <td>${h.name}</td>
+      <td>${h.description}</td>
+      <td>${h.occupancy_limit}</td>
+      <td><a href="${h.photo_url}" target="_blank">View</a></td>
+      <td>
+        <button class="edit-hostel"   data-id="${h.id}">Edit</button>
+        <button class="delete-hostel" data-id="${h.id}">Delete</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  document.querySelectorAll('.edit-hostel').forEach(b =>
+    b.addEventListener('click', () => openHostelForm(b.dataset.id))
+  );
+  document.querySelectorAll('.delete-hostel').forEach(b =>
+    b.addEventListener('click', () => deleteHostel(b.dataset.id))
+  );
+}
+
+async function openHostelForm(id = '') {
+  ['hostel-id','hostel-name','hostel-description','hostel-occupancy','hostel-photo']
+    .forEach(f => { const e = document.getElementById(f); if (e) e.value = ''; });
   if (id) {
-    const res = await fetch(`${BACKEND_URL}/api/hostels/${id}`);
-    if (!res.ok) return alert('Hostel not found');
-    const h = await res.json();
+    const h = await fetchWithErrorHandling(`${BACKEND_URL}/api/hostels/${id}`);
+    if (!h) return;
     document.getElementById('hostel-id').value          = h.id;
     document.getElementById('hostel-name').value        = h.name;
-    document.getElementById('hostel-address').value     = h.address || '';
     document.getElementById('hostel-description').value = h.description;
     document.getElementById('hostel-occupancy').value   = h.occupancy_limit;
     document.getElementById('hostel-photo').value       = h.photo_url;
@@ -86,92 +121,69 @@ async function saveHostel(e) {
   const id = document.getElementById('hostel-id').value;
   const payload = {
     name:            document.getElementById('hostel-name').value.trim(),
-    address:         document.getElementById('hostel-address').value.trim(),
     description:     document.getElementById('hostel-description').value.trim(),
     occupancy_limit: Number(document.getElementById('hostel-occupancy').value),
     photo_url:       document.getElementById('hostel-photo').value.trim()
   };
-  await fetch(
-    `${BACKEND_URL}/api/hostels${id ? `/${id}` : ''}`,
-    {
-      method: id ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }
-  );
-  closeModal('hostel-form-modal');
-  loadHostelsAdmin();
+  const url    = id ? `${BACKEND_URL}/api/hostels/${id}` : `${BACKEND_URL}/api/hostels`;
+  const method = id ? 'PUT' : 'POST';
+  const res    = await fetchWithErrorHandling(url, { method, body: JSON.stringify(payload) });
+  if (res) {
+    closeModal('hostel-form-modal');
+    loadHostelsAdmin();
+  }
 }
 
 async function deleteHostel(id) {
   if (!confirm('Delete this hostel?')) return;
-  await fetch(`${BACKEND_URL}/api/hostels/${id}`, { method: 'DELETE' });
-  loadHostelsAdmin();
+  const res = await fetchWithErrorHandling(`${BACKEND_URL}/api/hostels/${id}`, { method: 'DELETE' });
+  if (res) loadHostelsAdmin();
 }
 
-
-// — ROOMS CRUD
+// ─── ROOMS ─────────────────────────────────────────────────────────────────────
 async function loadRoomsAdmin() {
+  const rooms = await fetchWithErrorHandling(`${BACKEND_URL}/api/rooms`);
+  if (!rooms) return;
   const tbody = document.getElementById('rooms-table-body');
-  tbody.innerHTML = '<tr><td colspan="8">Loading rooms…</td></tr>';
-  try {
-    const [rRes, hRes] = await Promise.all([
-      fetch(`${BACKEND_URL}/api/rooms`),
-      fetch(`${BACKEND_URL}/api/hostels`)
-    ]);
-    if (!rRes.ok) throw new Error(`Rooms API ${rRes.status}`);
-    if (!hRes.ok) throw new Error(`Hostels API ${hRes.status}`);
-    const rooms   = await rRes.json();
-    const hostels = await hRes.json();
-    if (!Array.isArray(rooms) || !Array.isArray(hostels)) {
-      throw new Error('Expected arrays');
-    }
-
-    tbody.innerHTML = '';
-    if (rooms.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8">No rooms found.</td></tr>';
-      return;
-    }
-
-    rooms.forEach(r => {
-      const hostelName = (hostels.find(h => h.id === r.hostel_id) || {}).name || '—';
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${r.id}</td>
-        <td>${r.name}</td>
-        <td>${r.description}</td>
-        <td>${r.price}</td>
-        <td>${r.occupancy_limit}</td>
-        <td>${hostelName}</td>
-        <td><a href="${r.photo_url}" target="_blank">View</a></td>
-        <td>
-          <button class="edit-room"   data-id="${r.id}">Edit</button>
-          <button class="delete-room" data-id="${r.id}">Delete</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    console.error('Error loading rooms:', err);
-    tbody.innerHTML = `<tr><td colspan="8">Error loading rooms.</td></tr>`;
-  }
+  if (!tbody) return console.error('No #rooms-table-body');
+  tbody.innerHTML = '';
+  rooms.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.id}</td>
+      <td>${r.name}</td>
+      <td>${r.description}</td>
+      <td>${r.price}</td>
+      <td>${r.occupancy_limit}</td>
+      <td>${r.hostel_id}</td>
+      <td><a href="${r.photo_url}" target="_blank">View</a></td>
+      <td>
+        <button class="edit-room"   data-id="${r.id}">Edit</button>
+        <button class="delete-room" data-id="${r.id}">Delete</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  document.querySelectorAll('.edit-room').forEach(b =>
+    b.addEventListener('click', () => openRoomForm(b.dataset.id))
+  );
+  document.querySelectorAll('.delete-room').forEach(b =>
+    b.addEventListener('click', () => deleteRoom(b.dataset.id))
+  );
 }
 
 async function openRoomForm(id = '') {
   ['room-id','room-name','room-description','room-price','room-occupancy','room-hostel-id','room-photo']
-    .forEach(fid => document.getElementById(fid).value = '');
-
+    .forEach(f => { const e = document.getElementById(f); if (e) e.value = ''; });
   if (id) {
-    const res = await fetch(`${BACKEND_URL}/api/rooms/${id}`);
-    if (!res.ok) return alert('Room not found');
-    const r = await res.json();
-    document.getElementById('room-id').value           = r.id;
-    document.getElementById('room-name').value         = r.name;
-    document.getElementById('room-description').value  = r.description;
-    document.getElementById('room-price').value        = r.price;
-    document.getElementById('room-occupancy').value    = r.occupancy_limit;
-    document.getElementById('room-hostel-id').value    = r.hostel_id;
-    document.getElementById('room-photo').value        = r.photo_url;
+    const r = await fetchWithErrorHandling(`${BACKEND_URL}/api/rooms/${id}`);
+    if (!r) return;
+    document.getElementById('room-id').value         = r.id;
+    document.getElementById('room-name').value       = r.name;
+    document.getElementById('room-description').value= r.description;
+    document.getElementById('room-price').value      = r.price;
+    document.getElementById('room-occupancy').value  = r.occupancy_limit;
+    document.getElementById('room-hostel-id').value  = r.hostel_id;
+    document.getElementById('room-photo').value      = r.photo_url;
   }
   openModal('room-form-modal');
 }
@@ -187,152 +199,110 @@ async function saveRoom(e) {
     hostel_id:       Number(document.getElementById('room-hostel-id').value),
     photo_url:       document.getElementById('room-photo').value.trim()
   };
-  await fetch(
-    `${BACKEND_URL}/api/rooms${id ? `/${id}` : ''}`,
-    {
-      method: id ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }
-  );
-  closeModal('room-form-modal');
-  loadRoomsAdmin();
+  const url    = id ? `${BACKEND_URL}/api/rooms/${id}` : `${BACKEND_URL}/api/rooms`;
+  const method = id ? 'PUT' : 'POST';
+  const res    = await fetchWithErrorHandling(url, { method, body: JSON.stringify(payload) });
+  if (res) {
+    closeModal('room-form-modal');
+    loadRoomsAdmin();
+  }
 }
 
 async function deleteRoom(id) {
   if (!confirm('Delete this room?')) return;
-  await fetch(`${BACKEND_URL}/api/rooms/${id}`, { method: 'DELETE' });
-  loadRoomsAdmin();
+  const res = await fetchWithErrorHandling(`${BACKEND_URL}/api/rooms/${id}`, { method:'DELETE' });
+  if (res) loadRoomsAdmin();
 }
 
-
-// — STUDENTS CRUD
+// ─── STUDENTS ─────────────────────────────────────────────────────────────────
 async function loadStudentsAdmin() {
+  const users = await fetchWithErrorHandling(`${BACKEND_URL}/api/users`);
+  if (!users) return;
   const tbody = document.getElementById('students-table-body');
-  tbody.innerHTML = '<tr><td colspan="5">Loading students…</td></tr>';
-  try {
-    const res   = await fetch(`${BACKEND_URL}/api/users`);
-    if (!res.ok) throw new Error(`Users API ${res.status}`);
-    const users = await res.json();
-    if (!Array.isArray(users)) throw new Error('Expected array');
-
-    tbody.innerHTML = '';
-    if (users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5">No students found.</td></tr>';
-      return;
-    }
-
-    users.forEach(u => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${u.id}</td>
-        <td>${u.username}</td>
-        <td>${u.email}</td>
-        <td>${u.phone || ''}</td>
-        <td>
-          <button class="delete-student" data-id="${u.id}">Delete</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    console.error('Error loading students:', err);
-    tbody.innerHTML = `<tr><td colspan="5">Error loading students.</td></tr>`;
-  }
+  if (!tbody) return console.error('No #students-table-body');
+  tbody.innerHTML = '';
+  users.forEach(u => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${u.id}</td>
+      <td>${u.username}</td>
+      <td>${u.email}</td>
+      <td>${u.phone}</td>
+      <td><button class="delete-student" data-id="${u.id}">Delete</button></td>`;
+    tbody.appendChild(tr);
+  });
+  document.querySelectorAll('.delete-student').forEach(b =>
+    b.addEventListener('click', () => deleteStudent(b.dataset.id))
+  );
 }
 
 async function deleteStudent(id) {
   if (!confirm('Delete this student?')) return;
-  await fetch(`${BACKEND_URL}/api/users/${id}`, { method: 'DELETE' });
-  loadStudentsAdmin();
+  const res = await fetchWithErrorHandling(`${BACKEND_URL}/api/users/${id}`, { method:'DELETE' });
+  if (res) loadStudentsAdmin();
 }
 
-
-// — APPLICATIONS CRUD
+// ─── APPLICATIONS ─────────────────────────────────────────────────────────────
 async function loadApplicationsAdmin() {
+  const apps = await fetchWithErrorHandling(`${BACKEND_URL}/api/applications`);
+  if (!apps) return;
   const tbody = document.getElementById('applications-table-body');
-  tbody.innerHTML = '<tr><td colspan="6">Loading applications…</td></tr>';
-  try {
-    const res  = await fetch(`${BACKEND_URL}/api/applications`);
-    if (!res.ok) throw new Error(`Applications API ${res.status}`);
-    const apps = await res.json();
-    if (!Array.isArray(apps)) throw new Error('Expected array');
-
-    tbody.innerHTML = '';
-    if (apps.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6">No applications found.</td></tr>';
-      return;
-    }
-
-    apps.forEach(a => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${a.id}</td>
-        <td>${a.user_id}</td>
-        <td>${a.room_id}</td>
-        <td>${a.status}</td>
-        <td>${new Date(a.applied_at).toLocaleString()}</td>
-        <td>
-          <button class="approve-app" data-id="${a.id}">Approve</button>
-          <button class="reject-app"  data-id="${a.id}">Reject</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    console.error('Error loading applications:', err);
-    tbody.innerHTML = `<tr><td colspan="6">Error loading applications.</td></tr>`;
-  }
+  if (!tbody) return console.error('No #applications-table-body');
+  tbody.innerHTML = '';
+  apps.forEach(a => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${a.id}</td>
+      <td>${a.user_id}</td>
+      <td>${a.room_id}</td>
+      <td>${a.status}</td>
+      <td>${new Date(a.applied_at).toLocaleString()}</td>
+      <td>
+        <button class="approve-app" data-id="${a.id}">Approve</button>
+        <button class="reject-app"  data-id="${a.id}">Reject</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  document.querySelectorAll('.approve-app').forEach(b =>
+    b.addEventListener('click', () => updateApplication(b.dataset.id, 'Accepted'))
+  );
+  document.querySelectorAll('.reject-app').forEach(b =>
+    b.addEventListener('click', () => updateApplication(b.dataset.id, 'Rejected'))
+  );
 }
 
 async function updateApplication(id, status) {
-  await fetch(`${BACKEND_URL}/api/applications/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status })
+  const res = await fetchWithErrorHandling(`${BACKEND_URL}/api/applications/${id}`, {
+    method:'PUT', body: JSON.stringify({ status })
   });
-  loadApplicationsAdmin();
+  if (res) loadApplicationsAdmin();
 }
 
-
-// — NOTIFICATIONS CRUD
+// ─── NOTIFICATIONS ───────────────────────────────────────────────────────────
 async function loadNotificationsAdmin() {
+  const notifs = await fetchWithErrorHandling(`${BACKEND_URL}/api/notifications`);
+  if (!notifs) return;
   const tbody = document.getElementById('notifications-table-body');
-  tbody.innerHTML = '<tr><td colspan="7">Loading notifications…</td></tr>';
-  try {
-    const res    = await fetch(`${BACKEND_URL}/api/notifications`);
-    if (!res.ok) throw new Error(`Notifications API ${res.status}`);
-    const notifs = await res.json();
-    if (!Array.isArray(notifs)) throw new Error('Expected array');
-
-    tbody.innerHTML = '';
-    if (notifs.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7">No notifications found.</td></tr>';
-      return;
-    }
-
-    notifs.forEach(n => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${n.id}</td>
-        <td>${n.user_id}</td>
-        <td>${n.user_role}</td>
-        <td>${n.message}</td>
-        <td>${n.type}</td>
-        <td>${n.is_read ? 'Yes' : 'No'}</td>
-        <td><button class="read-notif" data-id="${n.id}">Mark Read</button></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    console.error('Error loading notifications:', err);
-    tbody.innerHTML = `<tr><td colspan="7">Error loading notifications.</td></tr>`;
-  }
-}
-
-async function markNotifRead(id) {
-  await fetch(`${BACKEND_URL}/api/notifications/${id}/read`, { method: 'PUT' });
-  loadNotificationsAdmin();
+  if (!tbody) return console.error('No #notifications-table-body');
+  tbody.innerHTML = '';
+  notifs.forEach(n => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${n.id}</td>
+      <td>${n.user_id}</td>
+      <td>${n.user_role}</td>
+      <td>${n.message}</td>
+      <td>${n.type}</td>
+      <td>${n.is_read ? 'Yes' : 'No'}</td>
+      <td><button class="read-notif" data-id="${n.id}">Mark Read</button></td>`;
+    tbody.appendChild(tr);
+  });
+  document.querySelectorAll('.read-notif').forEach(b =>
+    b.addEventListener('click', () => {
+      fetchWithErrorHandling(`${BACKEND_URL}/api/notifications/${b.dataset.id}/read`, { method:'PUT' })
+        .then(ok => { if (ok) loadNotificationsAdmin(); });
+    })
+  );
 }
 
 async function sendNotification(e) {
@@ -340,80 +310,47 @@ async function sendNotification(e) {
   const payload = {
     user_id:    +document.getElementById('notif-user-id').value,
     user_role:  document.getElementById('notif-user-role').value,
-    message:    document.getElementById('notif-message').value,
     type:       document.getElementById('notif-type').value,
+    message:    document.getElementById('notif-message').value,
     is_read:    false,
     created_at: new Date().toISOString()
   };
-  await fetch(`${BACKEND_URL}/api/notifications`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+  const res = await fetchWithErrorHandling(`${BACKEND_URL}/api/notifications`, {
+    method:'POST', body: JSON.stringify(payload)
   });
-  loadNotificationsAdmin();
+  if (res) loadNotificationsAdmin();
 }
 
-
-// — INITIALIZE & DELEGATE
+// ─── INITIALIZE ─────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  // common
-  document.getElementById('logout-link')?.addEventListener('click', logout);
+  setupAdminAuthLink();
+  const page = location.pathname.split('/').pop().toLowerCase();
 
-  // hostels page
-  if (location.pathname.endsWith('admin-hostels.html')) {
-    loadHostelsAdmin();
-    document.getElementById('create-hostel-button')
-      ?.addEventListener('click', () => openHostelForm());
-    document.getElementById('hostels-table-body')
-      ?.addEventListener('click', e => {
-        if (e.target.matches('.edit-hostel'))   openHostelForm(e.target.dataset.id);
-        if (e.target.matches('.delete-hostel')) deleteHostel(e.target.dataset.id);
-      });
-    document.getElementById('hostel-form')
-      ?.addEventListener('submit', saveHostel);
-  }
-
-  // rooms page
-  if (location.pathname.endsWith('admin-rooms.html')) {
-    loadRoomsAdmin();
-    document.getElementById('create-room-button')
-      ?.addEventListener('click', () => openRoomForm());
-    document.getElementById('rooms-table-body')
-      ?.addEventListener('click', e => {
-        if (e.target.matches('.edit-room'))   openRoomForm(e.target.dataset.id);
-        if (e.target.matches('.delete-room')) deleteRoom(e.target.dataset.id);
-      });
-    document.getElementById('room-form')
-      ?.addEventListener('submit', saveRoom);
-  }
-
-  // students page
-  if (location.pathname.endsWith('admin-students.html')) {
-    loadStudentsAdmin();
-    document.getElementById('students-table-body')
-      ?.addEventListener('click', e => {
-        if (e.target.matches('.delete-student')) deleteStudent(e.target.dataset.id);
-      });
-  }
-
-  // applications page
-  if (location.pathname.endsWith('admin-applications.html')) {
-    loadApplicationsAdmin();
-    document.getElementById('applications-table-body')
-      ?.addEventListener('click', e => {
-        if (e.target.matches('.approve-app')) updateApplication(e.target.dataset.id, 'Accepted');
-        if (e.target.matches('.reject-app'))  updateApplication(e.target.dataset.id, 'Rejected');
-      });
-  }
-
-  // notifications page
-  if (location.pathname.endsWith('admin-notifications.html')) {
+  if (page.includes('hostels'))   loadHostelsAdmin();
+  if (page.includes('rooms'))     loadRoomsAdmin();
+  if (page.includes('students'))  loadStudentsAdmin();
+  if (page.includes('applications')) loadApplicationsAdmin();
+  if (page.includes('notifications')) {
     loadNotificationsAdmin();
     document.getElementById('notification-form')
       ?.addEventListener('submit', sendNotification);
-    document.getElementById('notifications-table-body')
-      ?.addEventListener('click', e => {
-        if (e.target.matches('.read-notif')) markNotifRead(e.target.dataset.id);
-      });
+  }
+
+  if (page.includes('hostels')) {
+    document.getElementById('create-hostel-button')
+      ?.addEventListener('click', () => openHostelForm());
+    document.getElementById('hostel-form')
+      ?.addEventListener('submit', saveHostel);
+    document.getElementById('hostel-form-cancel')
+      ?.addEventListener('click', e => { e.preventDefault(); closeModal('hostel-form-modal'); });
+  }
+
+  if (page.includes('rooms')) {
+    document.getElementById('create-room-button')
+      ?.addEventListener('click', () => openRoomForm());
+    document.getElementById('room-form')
+      ?.addEventListener('submit', saveRoom);
+    document.getElementById('room-form-cancel')
+      ?.addEventListener('click', e => { e.preventDefault(); closeModal('room-form-modal'); });
   }
 });
